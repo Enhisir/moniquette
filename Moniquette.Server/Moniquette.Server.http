@@ -1,0 +1,6 @@
+@Moniquette.Server_HostAddress = http://localhost:5062
+
+GET {{Moniquette.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,8 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moniquette.Client", "Moniquette.Client\Moniquette.Client.csproj", "{57C76700-8C7B-4B64-9315-B9FD58B4608C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moniquette.Server", "Moniquette.Server\Moniquette.Server.csproj", "{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57C76700-8C7B-4B64-9315-B9FD58B4608C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C76700-8C7B-4B64-9315-B9FD58B4608C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57C76700-8C7B-4B64-9315-B9FD58B4608C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57C76700-8C7B-4B64-9315-B9FD58B4608C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
