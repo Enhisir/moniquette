@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moniquette.Client", "Moniqu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moniquette.Server", "Moniquette.Server\Moniquette.Server.csproj", "{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moniquette.Common", "Moniquette.Common\Moniquette.Common.csproj", "{1D4C754E-36D1-4608-948D-E86CB7AC02F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FD029EA-6B9A-4014-92A0-A41AFFBBFB89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D4C754E-36D1-4608-948D-E86CB7AC02F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D4C754E-36D1-4608-948D-E86CB7AC02F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D4C754E-36D1-4608-948D-E86CB7AC02F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D4C754E-36D1-4608-948D-E86CB7AC02F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
