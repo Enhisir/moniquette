@@ -6,6 +6,6 @@ namespace Moniquette.Common.Api;
 
 public interface IBaseApi
 {
-    public Task<IApiResult> Register(RegistrationRequest request);
-    public Task<IApiResult> SendReport(Report report);
+    public Task<IApiResult> RegisterAsync(RegistrationRequestDto requestDto, CancellationToken cancellationToken = default);
+    public Task<IApiResult> SendReportAsync(Report report, CancellationToken cancellationToken = default);
 }

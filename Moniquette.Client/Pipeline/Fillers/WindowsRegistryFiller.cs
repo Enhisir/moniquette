@@ -1,18 +1,19 @@
 using Hardware.Info;
 using Microsoft.Win32;
 using Moniquette.Common;
+using Moniquette.Common.Helpers;
 using Moniquette.Common.Models;
 
 namespace Moniquette.Client.Pipeline.Fillers;
 
-[System.Runtime.Versioning.SupportedOSPlatform(TargetSystems.Windows)]
+[System.Runtime.Versioning.SupportedOSPlatform(Literals.Windows)]
 public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
 {
     public Task<Report> Fill(Report report, CancellationToken cancellationToken)
     {
         // HardwareInfo should be already refreshed 
         if (!info.OperatingSystem.Name.Equals(
-                TargetSystems.Windows, 
+                Literals.Windows, 
                 StringComparison.InvariantCultureIgnoreCase))
             return Task.FromResult(report);
 
@@ -25,7 +26,8 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
                 GetRegistryEntriesDfs(registryArchive, baseKey);
             });
         }
-
+        report.WindowsRegistry = registryArchive;
+        
         return Task.FromResult(report);
     }
 

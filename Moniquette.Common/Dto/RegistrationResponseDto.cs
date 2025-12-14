@@ -1,6 +1,6 @@
 namespace Moniquette.Common.Dto;
 
-public class RegistrationResponse
+public class RegistrationResponseDto
 {
     public string Token { get; set; } = null!;
 }

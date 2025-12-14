@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package moniquette_common_grpc;
+
+option csharp_namespace = "Moniquette.Common.gRPC";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/duration.proto";
+
+message RegistrationRequest {
+  string FirstName = 1;
+  string MiddleName = 2;
+  string LastName = 3;
+  string SerialNumber = 4;
+}
+
+message RegistrationResponse
+{
+  string Token = 1;
+}
+
+message ReportMessage {
+  bytes Data = 1;
+}
+
+service ReportService {
+  rpc Register (RegistrationRequest) returns (RegistrationResponse);
+  rpc SendReport (ReportMessage) returns (google.protobuf.Empty);
+}

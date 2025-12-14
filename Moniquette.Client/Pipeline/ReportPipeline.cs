@@ -6,16 +6,19 @@ namespace Moniquette.Client.Pipeline;
 
 public class ReportPipeline(IServiceProvider provider)
 {
-    public async Task<Report> RunAsync(CancellationToken ct = default)
+    public async Task<Report> RunAsync(Guid sessionId, CancellationToken ct = default)
     {
-        var report = new Report();
-        var fillers = provider.GetServices<IReportFiller>();
+        var report = new Report { SessionId = sessionId, Timestamp = DateTime.UtcNow };
 
-        foreach (var filler in fillers)
-        {
-            report = await filler.Fill(report, ct);
-        }
-
-        return report;
+        return await provider
+            .GetServices<IReportFiller>()
+            .ToAsyncEnumerable()
+            .AggregateAwaitWithCancellationAsync(report, ApplyFillerAsync, ct);
     }
+    
+    private static async ValueTask<Report> ApplyFillerAsync(
+        Report accumulate, 
+        IReportFiller filler, 
+        CancellationToken ct = default)
+        => await filler.Fill(accumulate, ct);
 }

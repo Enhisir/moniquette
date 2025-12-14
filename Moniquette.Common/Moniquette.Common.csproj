@@ -4,10 +4,30 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Google.Protobuf" Version="3.33.0" />
+      <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
+      <PackageReference Include="Grpc.Tools" Version="2.72.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Hardware.Info" Version="101.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Protos\report.proto" />
+      <Protobuf Include="Protos\report.proto">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Protobuf>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="MessagePack">
+        <HintPath>..\..\..\.nuget\packages\messagepack\3.1.4\lib\net9.0\MessagePack.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

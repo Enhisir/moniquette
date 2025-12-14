@@ -1,12 +1,11 @@
 using System.Net.NetworkInformation;
-using Moniquette.Common;
 using Moniquette.Common.Extensions;
 using Moniquette.Common.Models;
 using Moniquette.Common.Utils;
 
 namespace Moniquette.Client.Pipeline.Fillers;
 
-public class NetworkReportFiller : IReportFiller
+public class NetworkFiller : IReportFiller
 {
     public Task<Report> Fill(Report report, CancellationToken cancellationToken)
     {

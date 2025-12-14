@@ -1,15 +1,15 @@
-using Moniquette.Common.Api.Result;
-
-namespace Moniquette.Common.Api;
+namespace Moniquette.Common.Api.Result;
 
 public class ApiError : IApiResult
 {
     public bool Success => false;
     
-    public HttpError Error { get; }
+    public string ErrorMessage { get; }
     
-    protected internal ApiError(HttpError error)
+    protected internal ApiError(string error)
     {
-        Error = error;
+        ErrorMessage = error;
     }
+    
+    public override string ToString() => $"{typeof(ApiError).FullName}{Environment.NewLine}{ErrorMessage}";
 }

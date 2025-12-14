@@ -1,0 +1,7 @@
+﻿services:
+  # moniquette.server:
+  #   image: moniquette.server
+  #   build:
+  #     context: .
+  #     dockerfile: Moniquette.Server/Dockerfile
+

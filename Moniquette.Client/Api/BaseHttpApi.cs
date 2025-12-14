@@ -15,25 +15,31 @@ public class BaseHttpApi(
 {
     private ClientConfig Config { get; } = configOptions.Value;
     
-    private HttpClient HttpClient { get; } = httpClientFactory.CreateClient(nameof(BaseApi));
+    private HttpClient HttpClient { get; } = httpClientFactory.CreateClient(nameof(BaseHttpApi));
     
-    public async Task<IApiResult> Register(RegistrationRequest request)
+    public async Task<IApiResult> RegisterAsync(
+        RegistrationRequestDto requestDto, 
+        CancellationToken cancellationToken = default)
     {
-        var uriBuilder = BuildCustomUri(Config.BaseAddress, Routes.Registration);
-        var httpResponse = await HttpClient.PostAsJsonAsync(uriBuilder.Uri, request);
-        return await GetIApiResult<RegistrationResponse>(httpResponse);
+        var uriBuilder = BuildCustomUri(Config.BaseHttpAddress, Routes.Registration);
+        var httpResponse = await HttpClient.PostAsJsonAsync(uriBuilder.Uri, requestDto, cancellationToken);
+        return await GetIApiResult<RegistrationResponseDto>(httpResponse);
     }
     
     // public async Task<IApiResult> SendPing(Report report) // нужно пинговать чаще
 
-    public async Task<IApiResult> SendReport(Report request)
+    public async Task<IApiResult> SendReportAsync(
+        Report request, 
+        CancellationToken cancellationToken = default)
     {
-        var uriBuilder = BuildCustomUri(Config.BaseAddress, Routes.SendReport);
-        var httpResponse = await HttpClient.PostAsJsonAsync(uriBuilder.Uri, request);
+        var uriBuilder = BuildCustomUri(Config.BaseHttpAddress, Routes.SendReport);
+        var httpResponse = await HttpClient.PostAsJsonAsync(uriBuilder.Uri, request, cancellationToken);
         return await GetIApiResult(httpResponse);
     }
 
-    private static async Task<IApiResult> GetIApiResult<TResponseData>(HttpResponseMessage httpResponse) where TResponseData : class
+    private static async Task<IApiResult> GetIApiResult<TResponseData>(
+        HttpResponseMessage httpResponse) 
+        where TResponseData : class
     {
         if (!httpResponse.IsSuccessStatusCode)
             return Results.Error(new HttpError

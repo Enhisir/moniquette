@@ -1,55 +1,98 @@
 using System.Text;
 using Hardware.Info;
-using Moniquette.Common;
+using Microsoft.Extensions.Logging;
+using Moniquette.Client.Services;
+using Moniquette.Common.Dto;
+using Moniquette.Common.Exceptions;
 using Moniquette.Common.Helpers;
 using Moniquette.Common.Models;
 
 namespace Moniquette.Client.Pipeline.Fillers;
 
-public class ActiveViewFiller(IHardwareInfo hardwareInfo) : IReportFiller
+public class ActiveViewFiller(
+    IHardwareInfo hardwareInfo,
+    WmctrlService wmctrlService,
+    GnomeWindowsExtensionService gnomeService,
+    ILogger<ActiveViewFiller> logger
+    ) : IReportFiller
 {
-    public Task<Report> Fill(Report report, CancellationToken cancellationToken)
+    public async Task<Report> Fill(Report report, CancellationToken cancellationToken)
     {
-        report.Views = GetViews();
-        return Task.FromResult(report);
+        if (!LinuxHelper.IsRoot())
+        {
+            // throw new WrongPrivilegesException("Linux executable must be run with sudo.");
+        }
+        report.Views = await GetViews();
+        return report;
     }
     
-    private List<string> GetViews()
+    private async Task<List<ActiveView>> GetViews()
     {
-        return hardwareInfo.OperatingSystem.Name.ToLower() switch
+        return GetOperatingSystemName() switch
         {
-            TargetSystems.Windows => GetWindowsViews(),
-            TargetSystems.Linux => GetLinuxViews(),
-            TargetSystems.MacOS => GetMacOSViews(),
+            Literals.Windows => GetWindowsViews(),
+            Literals.Linux => await GetLinuxViews(),
+            Literals.MacOS => [],
             _ => []
         };
     }
 
-    private List<string> GetWindowsViews()
+    private string GetOperatingSystemName()
     {
-        var result = new List<string>();
-        var handle = WindowsHelper.GetForegroundWindow();
-        var buffer = new StringBuilder(256);
-        WindowsHelper.GetWindowText(handle, buffer, buffer.Capacity);
-        result.Add(buffer.ToString().Trim());
-        return result;
+        var fullname = hardwareInfo.OperatingSystem.Name.ToLower();
+        if (fullname.Contains("windows")) return Literals.Windows;
+        if (fullname.Contains("linux")) return Literals.Linux;
+        if (fullname.Contains("macos")) return Literals.MacOS;
+        return fullname;
+    }
+        
+    [System.Runtime.Versioning.SupportedOSPlatform(Literals.Windows)]
+    private List<ActiveView> GetWindowsViews()
+    {
+        var views = new List<ActiveView>();
+        var callback = new CallBack((hWnd, pId) =>
+        {
+            var classNameBuffer = new StringBuilder(256);
+            var titleBuffer = new StringBuilder(256);
+            WindowsHelper.GetClassName(hWnd, classNameBuffer, classNameBuffer.Capacity);
+            WindowsHelper.GetWindowText(hWnd, titleBuffer, titleBuffer.Capacity);
+            views.Add(new ActiveView {
+                Id = hWnd,
+                Pid = pId,
+                Class = classNameBuffer.ToString(),
+                Title = titleBuffer.ToString()
+            });
+            return true;
+        });
+        WindowsHelper.EnumWindows(callback, IntPtr.Zero);
+        return views;
     }
 
-    private List<string> GetLinuxViews()
+    private async Task<List<ActiveView>> GetLinuxViews()
     {
-        var result = new List<string>();
-        var outputLinux = ShellScriptRunner.Run("xdotool", "getwindowfocus getwindowname"); // не работает в Wayland. Вообще.
-        if (!string.IsNullOrWhiteSpace(outputLinux)) result.Add(outputLinux.Trim());
-        return result;
+        if (!LinuxHelper.CheckSessionUsesWayland())
+        {
+            return wmctrlService.GetX11Views();
+        }
+        
+        Console.WriteLine("uses wayland");
+        return LinuxHelper.GetDesktopEnvironment() switch
+        {
+            Literals.GNOME => await gnomeService.ListActiveViews(),
+            Literals.KDE => [],
+            _ => []
+        };
     }
 
+    /*
     private List<string> GetMacOSViews()
     {
         var result = new List<string>();
         var outputMac = ShellScriptRunner.Run(
-            "osascript", 
+            "osascript",
             "-e 'tell application \"System Events\" to get name of (processes where frontmost is true)'");
         result.AddRange(outputMac.Split(',').Select(x => x.Trim()));
         return result;
     }
+    */
 }

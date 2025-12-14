@@ -1,18 +1,20 @@
+using Grpc.Net.Client;
 using Hardware.Info;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moniquette.Client.Api;
 using Moniquette.Client.Config;
 using Moniquette.Client.Pipeline.Fillers;
+using Moniquette.Client.Services;
 using Moniquette.Common.Api;
+using Tmds.DBus.Protocol;
 
 namespace Moniquette.Client.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    private const string ConfigurationPath = "";
-
     public static IServiceCollection AddLoggingReady(this IServiceCollection services)
         => services
             .AddLogging(builder => builder
@@ -20,6 +22,16 @@ public static class ServiceCollectionExtensions
                 .AddFilter("System", LogLevel.Warning)
                 .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
                 .AddConsole());
+
+    public static IServiceCollection AddServices(this IServiceCollection services)
+        => services
+            .AddSingleton<GnomeWindowsExtensionService>(_ =>
+            {
+                var connection = new Connection(Address.Session!);
+                connection.ConnectAsync().ConfigureAwait(true);
+                return new GnomeWindowsExtensionService(connection);
+            })
+            .AddTransient<WmctrlService>();
     
     public static IServiceCollection AddConfiguration(this IServiceCollection services)
     {
@@ -47,10 +59,22 @@ public static class ServiceCollectionExtensions
         => services
             .AddTransient<IReportFiller, HardwareFiller>()
             .AddTransient<IReportFiller, ActiveViewFiller>()
-            .AddTransient<IReportFiller, NetworkReportFiller>()
+            .AddTransient<IReportFiller, NetworkFiller>()
             .AddTransient<IReportFiller, WindowsRegistryFiller>();
+
+    public static IServiceCollection AddGrpcChannel(this IServiceCollection services)
+        => services
+            .AddSingleton<GrpcChannel>(provider =>
+            {
+                var config = provider.GetRequiredService<IOptions<ClientConfig>>().Value;
+                
+                var logger = provider.GetRequiredService<ILogger<GrpcChannel>>();
+                logger.LogInformation("Initializing gRPC channel for address {address}...",  config.BaseGrpcAddress);
+                return GrpcChannel.ForAddress(config.BaseGrpcAddress);
+            });
 
     public static IServiceCollection AddApi(this IServiceCollection services)
         => services
-            .AddScoped<IBaseApi, BaseApi>();
+            .AddScoped<IBaseApi, BaseHttpApi>()
+            .AddScoped<IBaseApi, BaseGrpcApi>();
 }
