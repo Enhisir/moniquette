@@ -8,7 +8,7 @@ using Moniquette.Common.Models;
 
 namespace Moniquette.Client.Api;
 
-public class BaseApi(
+public class BaseHttpApi(
     IOptions<ClientConfig> configOptions,
     IHttpClientFactory httpClientFactory) 
     : IBaseApi
