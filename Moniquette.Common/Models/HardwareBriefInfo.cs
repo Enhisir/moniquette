@@ -1,3 +1,4 @@
+/*
 using HWInfo = Hardware.Info;
 
 namespace Moniquette.Common.Models;
@@ -40,9 +41,10 @@ public class HardwareBriefInfo
             VideoControllerList = info.VideoControllerList
         };
 }
+*/
 
 #region Optimized code version
-/*
+
 using Moniquette.Common.Models.Hardware;
 using HWInfo = Hardware.Info;
 
@@ -51,13 +53,14 @@ namespace Moniquette.Common.Models;
 public class HardwareBriefInfo
 {
     public string OperatingSystem { get; set; } = null!;
-    public ulong AvailableRAM { get; set; } // Physical RAM in bytes
-    public Battery? Battery { get; set; } = null!; // заменить на мою батарею
-    public BIOS? Bios { get; set; } = null!;
-    public ComputerSystem? ComputerSystem { get; set; } = null!;
-    public CPU? CpuList { get; set; } = null!;
+    public ulong AvailableRam { get; set; } // Physical RAM in bytes
+    public Battery? Battery { get; set; }
+    public BIOS? Bios { get; set; }
+    public ComputerSystem? ComputerSystem { get; set; }
+
+    public CPU Cpu { get; set; } = null!;
     // public List<HWInfo.Memory> MemoryList { get; private set; } = null!; // переписать
-    public Motherboard? MotherboardList { get; set; } = null!;
+    public Motherboard? Motherboard { get; set; }
     public List<Mouse> MouseList { get; set; } = null!;
     public List<SoundDevice> SoundDeviceList { get; set; } = null!;
     
@@ -68,7 +71,7 @@ public class HardwareBriefInfo
         => new()
         {
             OperatingSystem = $"{info.OperatingSystem.Name} {info.OperatingSystem.VersionString}",
-            AvailableRAM = info.MemoryStatus.TotalPhysical,
+            AvailableRam = info.MemoryStatus.TotalPhysical,
             Battery = info
                 .BatteryList
                 .Select(b => new Battery { FullChargeCapacity = b.FullChargeCapacity, DesignCapacity = b.DesignCapacity })
@@ -81,7 +84,7 @@ public class HardwareBriefInfo
                 .ComputerSystemList
                 .Select(s => new ComputerSystem { Name = s.Name, Vendor = s.Vendor})
                 .SingleOrDefault(),
-            CpuList = info
+            Cpu = info
                 .CpuList
                 .Select(cp=> new CPU {
                         Name = cp.Name, 
@@ -92,9 +95,9 @@ public class HardwareBriefInfo
                         L2CacheSize = cp.L2CacheSize, 
                         L3CacheSize = cp.L3CacheSize
                     })
-                .SingleOrDefault(), // CPU не должно быть больше одного на клиентском устройстве
+                .Single(), // CPU не должно быть больше одного на клиентском устройстве
             // MemoryList = info.MemoryList,
-            MotherboardList = info
+            Motherboard = info
                 .MotherboardList
                 .Select(mb => new Motherboard {  Manufacturer = mb.Manufacturer, Product = mb.Product })
                 .SingleOrDefault(), // Материнских плат не должно быть больше одной на клиентском устройстве
@@ -108,5 +111,5 @@ public class HardwareBriefInfo
                 .ToList()
         };
 }
-*/
+
 #endregion
