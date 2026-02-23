@@ -1,6 +1,5 @@
-using System.Diagnostics;
-using Moniquette.Common.Dto;
 using Moniquette.Common.Models;
+using LinuxUtils = Moniquette.Common.Utils.LinuxUtils;
 
 namespace Moniquette.Client.Services;
 
@@ -11,7 +10,7 @@ public class WmctrlService
         var windowsString = GetWindowInfo();
         if (string.IsNullOrWhiteSpace(windowsString))
             throw new Exception("Wmctrl service returned an empty string");
-        
+
         return windowsString
             .Trim()
             .Split('\n')
@@ -30,35 +29,18 @@ public class WmctrlService
                 };
             }).ToList();
     }
-    
+
     private string GetWindowInfo()
     {
-        var awkCommand = "{print $1 \";\" $3 \";\" $4 \";\" substr($0, index($0,$6))}";
-        var fullCommand = $"wmctrl -lpx | awk '{awkCommand}'";
-        return RunShellScript(fullCommand);
-    }
-    
-    private string RunShellScript(string command)
-    {
-        command = command.Replace("\"", "\\\"");
-        try
+        const string awkCommand = "{print $1 \";\" $3 \";\" $4 \";\" substr($0, index($0,$6))}";
+        const string fullCommand = $"wmctrl -lpx | awk '{awkCommand}'";
+        var processResult = LinuxUtils.RunShellScript(fullCommand);
+        if (!processResult)
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "bash",
-                Arguments = $"-c \"{command}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+            throw new Exception($"Exception occured while running Wmctrl service{Environment.NewLine}" +
+                                processResult);
+        }
 
-            var proc = Process.Start(psi);
-            return proc?.StandardOutput.ReadToEnd().Trim() ?? string.Empty;
-        }
-        catch (Exception ex)
-        {
-            return $"ERROR: {ex.Message}";
-        }
+        return processResult.Value;
     }
 }

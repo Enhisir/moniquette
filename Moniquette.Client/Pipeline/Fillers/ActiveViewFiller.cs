@@ -2,10 +2,8 @@ using System.Text;
 using Hardware.Info;
 using Microsoft.Extensions.Logging;
 using Moniquette.Client.Services;
-using Moniquette.Common.Dto;
-using Moniquette.Common.Exceptions;
-using Moniquette.Common.Helpers;
 using Moniquette.Common.Models;
+using Moniquette.Common.Utils;
 
 namespace Moniquette.Client.Pipeline.Fillers;
 
@@ -18,7 +16,7 @@ public class ActiveViewFiller(
 {
     public async Task<Report> Fill(Report report, CancellationToken cancellationToken)
     {
-        if (!LinuxHelper.IsRoot())
+        if (!LinuxUtils.IsRoot())
         {
             // throw new WrongPrivilegesException("Linux executable must be run with sudo.");
         }
@@ -47,15 +45,15 @@ public class ActiveViewFiller(
     }
         
     [System.Runtime.Versioning.SupportedOSPlatform(Literals.Windows)]
-    private List<ActiveView> GetWindowsViews()
+    private static List<ActiveView> GetWindowsViews()
     {
         var views = new List<ActiveView>();
         var callback = new CallBack((hWnd, pId) =>
         {
             var classNameBuffer = new StringBuilder(256);
             var titleBuffer = new StringBuilder(256);
-            WindowsHelper.GetClassName(hWnd, classNameBuffer, classNameBuffer.Capacity);
-            WindowsHelper.GetWindowText(hWnd, titleBuffer, titleBuffer.Capacity);
+            _ = WindowsUtils.GetClassName(hWnd, classNameBuffer, classNameBuffer.Capacity);
+            _ = WindowsUtils.GetWindowText(hWnd, titleBuffer, titleBuffer.Capacity);
             views.Add(new ActiveView {
                 Id = hWnd,
                 Pid = pId,
@@ -64,19 +62,19 @@ public class ActiveViewFiller(
             });
             return true;
         });
-        WindowsHelper.EnumWindows(callback, IntPtr.Zero);
+        WindowsUtils.EnumWindows(callback, IntPtr.Zero);
         return views;
     }
 
     private async Task<List<ActiveView>> GetLinuxViews()
     {
-        if (!LinuxHelper.CheckSessionUsesWayland())
+        if (!LinuxUtils.CheckSessionUsesWayland())
         {
             return wmctrlService.GetX11Views();
         }
         
         Console.WriteLine("uses wayland");
-        return LinuxHelper.GetDesktopEnvironment() switch
+        return LinuxUtils.GetDesktopEnvironment() switch
         {
             Literals.GNOME => await gnomeService.ListActiveViews(),
             Literals.KDE => [],

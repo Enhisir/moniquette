@@ -2,8 +2,23 @@
 
 public static class BaseUtils
 {
-    public static T? SafeGet<T>(Func<T> action, T? defaultValue = default)
+    public static T? TryInvoke<T>(Func<T> func, T? defaultValue = default)
     {
-        try { return action(); } catch { return defaultValue; }
+        try { return func(); } catch { return defaultValue; }
+    }
+    
+    public static void TryInvoke<TException>(
+        Action action,
+        Action<TException>? exceptionAction = null)
+        where TException : Exception
+    {
+        try
+        {
+            action.Invoke();
+        }
+        catch (TException e)
+        {
+            exceptionAction?.Invoke(e);
+        }
     }
 }

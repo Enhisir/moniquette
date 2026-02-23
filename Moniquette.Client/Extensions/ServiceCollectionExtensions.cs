@@ -60,7 +60,8 @@ public static class ServiceCollectionExtensions
             .AddTransient<IReportFiller, HardwareFiller>()
             .AddTransient<IReportFiller, ActiveViewFiller>()
             .AddTransient<IReportFiller, NetworkFiller>()
-            .AddTransient<IReportFiller, WindowsRegistryFiller>();
+            .AddTransient<IReportFiller, WindowsRegistryFiller>()
+            .AddTransient<IReportFiller, DockerFiller>();
 
     public static IServiceCollection AddGrpcChannel(this IServiceCollection services)
         => services

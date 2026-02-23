@@ -1,4 +1,4 @@
-namespace Moniquette.Common.Helpers;
+namespace Moniquette.Common.Utils;
 
 public class Literals
 {

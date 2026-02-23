@@ -9,5 +9,7 @@ public class Report
     public List<ActiveView> Views { get; set; } = null!;
     public HardwareBriefInfo HardwareInfo { get; set; } = null!;
     public List<NetworkConnection> Connections { get; set; } = null!;
-    public Dictionary<string, string>? WindowsRegistry { get; set; } = null!;
-};
+    public Dictionary<string, string>? WindowsRegistry { get; set; }
+    public bool IsDockerEnabled { get; set; }
+    public List<RunningDockerContainer>? DockerContainers { get; set; }
+}

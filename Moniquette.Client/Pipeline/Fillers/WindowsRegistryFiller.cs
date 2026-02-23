@@ -1,8 +1,7 @@
 using Hardware.Info;
 using Microsoft.Win32;
-using Moniquette.Common;
-using Moniquette.Common.Helpers;
 using Moniquette.Common.Models;
+using Moniquette.Common.Utils;
 
 namespace Moniquette.Client.Pipeline.Fillers;
 
@@ -20,7 +19,7 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
         var registryArchive = new Dictionary<string, string>();
         foreach (var (hive, view, _) in Roots)
         {
-            TryActionBase(() =>
+            BaseUtils.TryInvoke<Exception>(() =>
             {
                 using var baseKey = RegistryKey.OpenBaseKey(hive, view);
                 GetRegistryEntriesDfs(registryArchive, baseKey);
@@ -53,11 +52,11 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
         int maxDepth = 5)
     {
         if (currentDepth > maxDepth) return;
-        TryActionBase(() =>
+        BaseUtils.TryInvoke<Exception>(() =>
         {
             foreach (var entry in key.GetValueNames())
             {
-                TryActionBase(() =>
+                BaseUtils.TryInvoke<Exception>(() =>
                 {
                     var value = key.GetValue(entry)?.ToString() ?? "NULL";
                     registryArchive.Add(entry, value);
@@ -65,11 +64,11 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
             }
         });
 
-        TryActionBase(() =>
+        BaseUtils.TryInvoke<Exception>(() =>
         {
             foreach (var name in key.GetSubKeyNames())
             {
-                TryActionBase(() =>
+                BaseUtils.TryInvoke<Exception>(() =>
                 {
                     using var sub = key.OpenSubKey(name)!;
                     GetRegistryEntriesDfs(
@@ -82,24 +81,4 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
             }
         });
     }
-
-    private void TryAction<TException>(
-        Action action,
-        Action<TException>? exceptionAction = null)
-        where TException : Exception
-    {
-        try
-        {
-            action.Invoke();
-        }
-        catch (TException e)
-        {
-            exceptionAction?.Invoke(e);
-        }
-    }
-
-    private void TryActionBase(
-        Action action,
-        Action<Exception>? exceptionAction = null)
-        => TryAction(action, exceptionAction);
 }
