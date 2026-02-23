@@ -60,14 +60,14 @@ public class BinarySignatureManager(Config config)
         return seeds;
     }
 
-    private static HashFunction CreateHashFunction(long seed) =>
-        s =>
+    private static HashFunction CreateHashFunction(long seed)
+    {
+        return s =>
         {
-            var result = 1L;
-            for (var i = 0; i < s.Length; ++i)
-                result = (seed * result + Convert.ToInt64(i)) & 0xFFFFFFFF;
-            return result;
+            var hash = (uint)seed;
+            return s.Aggregate(hash, (current, c) => (current * 16777619) ^ c);
         };
+    }
 }
 
 public delegate long HashFunction(string input);

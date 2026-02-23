@@ -51,9 +51,14 @@ internal static class Program
         var instructionsTwo = extractor.GetTextSegmentInstructions(executablePathTwo);
         var signatureTwo = Bsc.CreateSignatureX86(instructionsTwo);
 
-        var comparer = new BinarySignatureComparer();
-        var result = comparer.Compare(signatureOne, signatureTwo);
+        var result = CompareSignatures(signatureOne, signatureTwo);
         Console.WriteLine("Signatures coincidence: {0} %", Math.Round(result, 4) * 100);
+    }
+
+    private static double CompareSignatures(long[] signatureA, long[] signatureB)
+    {
+        var equal = signatureA.Where((t, i) => t == signatureB[i]).Count();
+        return equal / (double)signatureA.Length;
     }
 
     private static void Observe(string outputPath)
@@ -61,7 +66,7 @@ internal static class Program
         var pipeline = new ProcessPipeline.ProcessPipeline(Capstone, Bsc);
         var pInfos = pipeline.GetWithSignature();
 
-        using var fileStream = new FileStream("output.json", FileMode.Create, FileAccess.Write);
+        using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
         JsonSerializer.Serialize(fileStream, pInfos, JsonSerializerOptions.Default);
         Console.WriteLine("Report saved into {0}", outputPath);
     }
