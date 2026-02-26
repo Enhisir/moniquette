@@ -1,4 +1,3 @@
-using ELFSharp.ELF;
 using Gee.External.Capstone.X86;
 using Moniquette.ProcessObserver.Models;
 using Moniquette.ProcessObserver.Services;
@@ -9,8 +8,6 @@ public class ProcessSignatureHandler(
     CapstoneX86Disassembler capstone,
     BinarySignatureManager psc) : IProcessHandler
 {
-    private const int DefaultMaxInstructions = 100_000;
-
     public IEnumerable<ProcessInfo> Invoke(IEnumerable<ProcessInfo>? processInfos = null)
     {
         var bfe = new BinaryFileExtractor(capstone);

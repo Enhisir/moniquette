@@ -1,7 +1,7 @@
 using Gee.External.Capstone.X86;
 using Moniquette.ProcessObserver.Infrastructure;
 
-namespace Moniquette.ProcessObserver;
+namespace Moniquette.ProcessObserver.Services;
 
 public class BinarySignatureManager(Config config)
 {
