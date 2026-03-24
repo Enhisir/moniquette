@@ -1,5 +1,4 @@
 using System.Text;
-using Hardware.Info;
 using Microsoft.Extensions.Logging;
 using Moniquette.Client.Services;
 using Moniquette.Common.Models;
@@ -8,7 +7,7 @@ using Moniquette.Common.Utils;
 namespace Moniquette.Client.Pipeline.Fillers;
 
 public class ActiveViewFiller(
-    IHardwareInfo hardwareInfo,
+    OperatingSystemService operatingSystemService,
     WmctrlService wmctrlService,
     GnomeWindowsExtensionService gnomeService,
     ILogger<ActiveViewFiller> logger
@@ -26,22 +25,12 @@ public class ActiveViewFiller(
     
     private async Task<List<ActiveView>> GetViews()
     {
-        return GetOperatingSystemName() switch
+        return operatingSystemService.GetOperatingSystem() switch
         {
             Literals.Windows => GetWindowsViews(),
             Literals.Linux => await GetLinuxViews(),
-            Literals.MacOS => [],
             _ => []
         };
-    }
-
-    private string GetOperatingSystemName()
-    {
-        var fullname = hardwareInfo.OperatingSystem.Name.ToLower();
-        if (fullname.Contains("windows")) return Literals.Windows;
-        if (fullname.Contains("linux")) return Literals.Linux;
-        if (fullname.Contains("macos")) return Literals.MacOS;
-        return fullname;
     }
         
     [System.Runtime.Versioning.SupportedOSPlatform(Literals.Windows)]
@@ -81,16 +70,4 @@ public class ActiveViewFiller(
             _ => []
         };
     }
-
-    /*
-    private List<string> GetMacOSViews()
-    {
-        var result = new List<string>();
-        var outputMac = ShellScriptRunner.Run(
-            "osascript",
-            "-e 'tell application \"System Events\" to get name of (processes where frontmost is true)'");
-        result.AddRange(outputMac.Split(',').Select(x => x.Trim()));
-        return result;
-    }
-    */
 }

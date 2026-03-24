@@ -8,7 +8,9 @@ using Moniquette.Client.Api;
 using Moniquette.Client.Config;
 using Moniquette.Client.Pipeline.Fillers;
 using Moniquette.Client.Services;
+using Moniquette.Client.Services.Abstractions;
 using Moniquette.Common.Api;
+using Moniquette.Common.Utils;
 using Tmds.DBus.Protocol;
 
 namespace Moniquette.Client.Extensions;
@@ -31,8 +33,33 @@ public static class ServiceCollectionExtensions
                 connection.ConnectAsync().ConfigureAwait(true);
                 return new GnomeWindowsExtensionService(connection);
             })
-            .AddTransient<WmctrlService>();
+            .AddScoped<WmctrlService>()
+            .AddScoped<IUsbDevicesService, UsbDevicesService>()
+            .AddBluetoothServices();
     
+    private static IServiceCollection AddBluetoothServices(this IServiceCollection services)
+    {
+        var service = services.BuildServiceProvider().GetService<OperatingSystemService>();
+        if (service is null)
+        {
+            throw new NullReferenceException(nameof(service));
+        }
+        switch (service.GetOperatingSystem())
+        {
+            case Literals.Linux:
+                services.AddScoped<IBluetoothDevicesService, LinuxBluetoothDevicesService>();
+                break;
+            case Literals.Windows:
+                // add windows service
+                break;
+            default:
+                // add logging and throw error
+                throw new NotImplementedException();
+        }
+
+        return services;
+    }
+
     public static IServiceCollection AddConfiguration(this IServiceCollection services)
     {
         var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -47,13 +74,14 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddHardwareInfo(this IServiceCollection services)
         => services
-            .AddScoped<IHardwareInfo, HardwareInfo>(_ =>
+            .AddSingleton<IHardwareInfo, HardwareInfo>(_ =>
             {
                 var hardwareInfo = new HardwareInfo();
                 hardwareInfo.RefreshAll();
                 return hardwareInfo;
-            });
-    
+            })
+            .AddTransient<OperatingSystemService>(); // HardwareInfo must be enabled
+
     public static IServiceCollection AddFillers(
         this IServiceCollection services)
         => services
@@ -62,15 +90,16 @@ public static class ServiceCollectionExtensions
             .AddTransient<IReportFiller, NetworkFiller>()
             .AddTransient<IReportFiller, WindowsRegistryFiller>()
             .AddTransient<IReportFiller, DockerFiller>();
+    // .AddTransient<IReportFiller, BluetoothDevicesFiller>();
 
     public static IServiceCollection AddGrpcChannel(this IServiceCollection services)
         => services
             .AddSingleton<GrpcChannel>(provider =>
             {
                 var config = provider.GetRequiredService<IOptions<ClientConfig>>().Value;
-                
+
                 var logger = provider.GetRequiredService<ILogger<GrpcChannel>>();
-                logger.LogInformation("Initializing gRPC channel for address {address}...",  config.BaseGrpcAddress);
+                logger.LogInformation("Initializing gRPC channel for address {address}...", config.BaseGrpcAddress);
                 return GrpcChannel.ForAddress(config.BaseGrpcAddress);
             });
 
