@@ -40,29 +40,6 @@ public class ReportService(
         
         return new Empty();
     }
-
-    /*
-    public override async Task<Empty> SendReportStream(IAsyncStreamReader<gRPC.ReportMessage> requestStream, ServerCallContext context)
-    {
-        await foreach(var request in requestStream.ReadAllAsync())
-        {
-            await ProcessMessageAsync(request, context.CancellationToken);
-        }
-        
-        return new Empty();
-    }
-
-    private async Task ProcessMessageAsync(gRPC.ReportMessage message, CancellationToken ct)
-    {
-        var messageBytes = new byte[message.Data.Length];
-        message.Data.CopyTo(messageBytes, 0);
-        var stream = new MemoryStream(messageBytes);
-        var report = await MessagePackSerializer
-            .DeserializeAsync<Report>(stream, SerializerOptions, ct);
-        
-        Console.WriteLine(JsonSerializer.Serialize(report));
-    }
-    */
     
     private static MessagePackSerializerOptions SerializerOptions { get; } =
         MessagePack.Resolvers.ContractlessStandardResolver.Options

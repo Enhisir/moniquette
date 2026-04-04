@@ -1,3 +1,5 @@
+using Gee.External.Capstone;
+using Gee.External.Capstone.X86;
 using Grpc.Net.Client;
 using Hardware.Info;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +13,7 @@ using Moniquette.Client.Services;
 using Moniquette.Client.Services.Abstractions;
 using Moniquette.Common.Api;
 using Moniquette.Common.Utils;
+using Moniquette.ProcessObserver.Services;
 using Tmds.DBus.Protocol;
 
 namespace Moniquette.Client.Extensions;
@@ -27,6 +30,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddServices(this IServiceCollection services)
         => services
+            .AddProcessObserving()
             .AddSingleton<GnomeWindowsExtensionService>(_ =>
             {
                 var connection = new Connection(Address.Session!);
@@ -36,7 +40,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<WmctrlService>()
             .AddScoped<IUsbDevicesService, UsbDevicesService>()
             .AddBluetoothServices();
-    
+
     private static IServiceCollection AddBluetoothServices(this IServiceCollection services)
     {
         var service = services.BuildServiceProvider().GetService<OperatingSystemService>();
@@ -44,6 +48,7 @@ public static class ServiceCollectionExtensions
         {
             throw new NullReferenceException(nameof(service));
         }
+
         switch (service.GetOperatingSystem())
         {
             case Literals.Linux:
@@ -58,6 +63,16 @@ public static class ServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    private static IServiceCollection AddProcessObserving(this IServiceCollection services)
+    {
+        var capstone = CapstoneDisassembler.CreateX86Disassembler(X86DisassembleMode.Bit64);
+        capstone.EnableInstructionDetails = true;
+        var bsc = new BinarySignatureManager(ProcessObserver.Infrastructure.Config.Instance);
+        return services
+            .AddSingleton(capstone)
+            .AddSingleton(bsc);
     }
 
     public static IServiceCollection AddConfiguration(this IServiceCollection services)
@@ -86,8 +101,9 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
         => services
             .AddTransient<IReportFiller, HardwareFiller>()
-            .AddTransient<IReportFiller, ActiveViewFiller>()
             .AddTransient<IReportFiller, NetworkFiller>()
+            .AddTransient<IReportFiller, ProcessFiller>()
+            .AddTransient<IReportFiller, ActiveViewFiller>()
             .AddTransient<IReportFiller, WindowsRegistryFiller>()
             .AddTransient<IReportFiller, DockerFiller>();
     // .AddTransient<IReportFiller, BluetoothDevicesFiller>();

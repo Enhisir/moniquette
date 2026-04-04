@@ -14,8 +14,6 @@ namespace Moniquette.Client;
 
 public class Agent(IServiceProvider serviceProvider)
 {
-    private ILogger<Agent> Logger { get; } = serviceProvider.GetService<ILogger<Agent>>()!;
-
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var config = GetConfig();
@@ -59,6 +57,8 @@ public class Agent(IServiceProvider serviceProvider)
             }
         }
     }
+    
+    private ILogger<Agent> Logger { get; } = serviceProvider.GetService<ILogger<Agent>>()!;
 
     private ClientConfig GetConfig()
     {

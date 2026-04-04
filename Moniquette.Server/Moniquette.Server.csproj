@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Moniquette.Common\Moniquette.Common.csproj" />
+      <ProjectReference Include="..\Moniquette.Elastic\Moniquette.Elastic.csproj" />
     </ItemGroup>
 
     <ItemGroup>

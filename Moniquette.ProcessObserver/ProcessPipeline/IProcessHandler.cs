@@ -1,4 +1,4 @@
-using Moniquette.ProcessObserver.Models;
+using Moniquette.Common.Models;
 
 namespace Moniquette.ProcessObserver.ProcessPipeline;
 

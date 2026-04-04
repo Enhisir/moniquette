@@ -1,5 +1,5 @@
 using Gee.External.Capstone.X86;
-using Moniquette.ProcessObserver.Models;
+using Moniquette.Common.Models;
 using Moniquette.ProcessObserver.Services;
 
 namespace Moniquette.ProcessObserver.ProcessPipeline;

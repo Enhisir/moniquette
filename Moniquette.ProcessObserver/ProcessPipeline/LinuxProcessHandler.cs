@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Moniquette.ProcessObserver.Models;
+using Moniquette.Common.Models;
 
 namespace Moniquette.ProcessObserver.ProcessPipeline;
 
@@ -17,7 +17,7 @@ public class LinuxProcessHandler : IProcessHandler
             .Select(p => new ProcessInfo
             {
                 Pid = p.Id,
-                Name = p.ProcessName,
+                Name = p.ProcessName.Split(' ').First(),
                 ExecutablePath = p.MainModule?.FileName.Trim() ?? string.Empty
             })
             .Where(p => !p.ExecutablePath.Equals(string.Empty))

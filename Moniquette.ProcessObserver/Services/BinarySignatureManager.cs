@@ -20,9 +20,12 @@ public class BinarySignatureManager(Config config)
         {
             foreach (var c in inst.Mnemonic)
                 tokenBuilder[tokenBuilderIndex++] = c;
-            
-            foreach (var op in inst.Details?.Operands ?? [])
-                tokenBuilder[tokenBuilderIndex++] = (char)op.Type;
+
+            if (inst.HasDetails)
+            {
+                foreach (var op in inst.Details?.Operands ?? [])
+                    tokenBuilder[tokenBuilderIndex++] = (char)op.Type;
+            }
 
             for (var i = 0; i < _hashFunctions.Count; i++)
             {

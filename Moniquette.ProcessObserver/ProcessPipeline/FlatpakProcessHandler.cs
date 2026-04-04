@@ -1,6 +1,6 @@
 using Moniquette.Common.Exceptions;
+using Moniquette.Common.Models;
 using Moniquette.Common.Utils;
-using Moniquette.ProcessObserver.Models;
 
 namespace Moniquette.ProcessObserver.ProcessPipeline;
 

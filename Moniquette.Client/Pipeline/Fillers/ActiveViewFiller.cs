@@ -19,7 +19,13 @@ public class ActiveViewFiller(
         {
             // throw new WrongPrivilegesException("Linux executable must be run with sudo.");
         }
-        report.Views = await GetViews();
+        var views = await GetViews();
+        report.Processes.ForEach(p =>
+        {
+            var pidView = views.SingleOrDefault(v => v.Pid.Equals(p.Pid));
+            var classView = views.FirstOrDefault(v => v.Class.Equals(p.Name, StringComparison.InvariantCultureIgnoreCase));
+            p.Title ??= pidView?.Title ?? classView?.Title;
+        });
         return report;
     }
     

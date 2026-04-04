@@ -1,6 +1,6 @@
-namespace Moniquette.Common.Models;
+namespace Moniquette.Elastic.Entities;
 
-public class RunningDockerContainer
+public class ElasticSuspiciousDockerImage
 {
     public string Name { get; set; } = null!;
     public string ImageName { get; set; } = null!;

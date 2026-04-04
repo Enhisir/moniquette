@@ -11,6 +11,17 @@ public class DockerFiller(
     private const string CheckDockerWindowsCommand = "Get-Process 'com.docker.proxy'";
     private const string CheckDockerLinuxCommand = "systemctl is-active docker";
     private const string GetContainersCommand = "docker ps --format \"table {{.ID}}\\t{{.Image}}\\t{{.Names}}\"";
+    
+    // TODO: Заменить
+    /*
+     * docker ps -q | while read cid; do
+         name=$(docker inspect --format='{{.Name}}' "$cid" | sed 's/^\/\(.*\)/\1/')
+         imagename=$(docker inspect --format='{{.Config.Image}}' "$cid")
+         digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$imagename" 2>/dev/null)
+         echo -e "$name\t$imagename\t${digest:-<no-digest>}"
+       done | column -t
+     */
+    
     private const string GetContainersLinuxCommand = $"{GetContainersCommand} | tail -n +2";
 
     public Task<Report> Fill(Report request, CancellationToken cancellationToken)
@@ -69,7 +80,7 @@ public class DockerFiller(
                         var info = line.Trim().Split();
                         return new RunningDockerContainer
                         {
-                            Id = info[0],
+                            ImageDigest = info[0],
                             Name = info[1],
                             ImageName = info[2]
                         };

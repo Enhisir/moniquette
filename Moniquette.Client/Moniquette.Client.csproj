@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Moniquette.Common\Moniquette.Common.csproj" />
+      <ProjectReference Include="..\Moniquette.ProcessObserver\Moniquette.ProcessObserver.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -43,6 +44,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <None Update="Dependencies\libusb-1.0.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="properties.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
