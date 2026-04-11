@@ -1,8 +1,12 @@
-export enum ProblemType {
-    Note = 0, Critical = 1
+export enum ThreatType {
+  Unknown = 0,
+  Note = 1,
+  Critical = 2,
 }
 
-export type Problem = {
-    type: ProblemType
-    message: string
-}
+export type Threat = {
+  id: string;
+  timestamp: string;
+  type: ThreatType;
+  details: string;
+};

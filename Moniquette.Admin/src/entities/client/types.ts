@@ -1,11 +1,12 @@
-import type { Hardware } from "@/entities/hardware/types"
-import type { Problem } from "@/entities/problems/types"
-import type { Student } from "@/entities/student/types"
+import type { Session } from "@/entities/session/types";
+import type { Report } from "@/entities/report/types";
+import type { Threat } from "@/entities/problems/types";
+import type { ProcessInfo } from "../process/types";
 
-export type Client = {
-    sessionId: string
-    ipAddress: string
-    student: Student
-    hardware: Hardware
-    problems: Problem[]
-}
+export type ClientSession = {
+  session: Session;
+  lastReport?: Report;
+  threats: Threat[];
+  ipAddress: string;
+  processes?: ProcessInfo[]
+};

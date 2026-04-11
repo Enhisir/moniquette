@@ -1,10 +1,10 @@
-import type { Client } from "@/entities/client/types";
+import type { ClientSession } from "@/entities/client/types";
 import { ClientListItem } from "./ClientListItem";
 
 type Props = {
-  clients: Client[];
+  clients: ClientSession[];
   selectedSessionId?: string;
-  onSelect: (client: Client) => void;
+  onSelect: (client: ClientSession) => void;
 };
 
 export const ClientList = ({
@@ -17,29 +17,27 @@ export const ClientList = ({
       className="
         w-full
         max-w-[400px]
-        flex flex-col
-        flex-1
+        flex flex-1 flex-col
         min-h-0
-        bg-gray-100
         rounded-lg
+        bg-gray-100
         p-2
       "
     >
       <div
         className="
-          flex flex-col
-          flex-1
+          flex flex-1 flex-col
           min-h-0
-          overflow-y-auto
           divide-y divide-gray-300
+          overflow-y-auto
           scrollbar-hide
         "
       >
-        {clients.map(client => (
+        {clients.map((client) => (
           <ClientListItem
-            key={client.sessionId}
+            key={client.session.id}
             client={client}
-            isSelected={client.sessionId === selectedSessionId}
+            isSelected={client.session.id === selectedSessionId}
             onClick={() => onSelect(client)}
           />
         ))}

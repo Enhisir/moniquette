@@ -6,11 +6,17 @@ type ToggleInputProps = {
   suffix?: string;
 };
 
-export const ToggleInput = ({ label, value, onChange, input, suffix }: ToggleInputProps) => (
-  <div className="flex items-center gap-3">
+export const ToggleInput = ({
+  label,
+  value,
+  onChange,
+  input,
+  suffix,
+}: ToggleInputProps) => (
+  <div className="flex flex-wrap items-center gap-3">
     <input
       type="checkbox"
-      className="w-5 h-5 border border-black rounded"
+      className="h-5 w-5 rounded border border-black"
       checked={value}
       onChange={(e) => onChange(e.target.checked)}
     />

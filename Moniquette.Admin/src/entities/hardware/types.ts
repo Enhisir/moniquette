@@ -1,50 +1,81 @@
-export type Hardware = {
-    operatingSystem: string
-    availableRam: number
-    // battery
-    bios?: BIOS
-    computerSystem?: ComputerSystem
-    cpu: CPU
-    motherboard: Motherboard
-    mouseList: Mouse[]
-    soundDeviceList: SoundDevice[]
-}
+export type HardwareBriefInfo = {
+  operatingSystem: string;
+  availableRam: number; // bytes
+  battery?: Battery;
+  bios?: BIOS;
+  computerSystem?: ComputerSystem;
+  cpu?: CPU;
+  motherboard?: Motherboard;
+  mouseList: Mouse[];
+  soundDeviceList: SoundDevice[];
+  usbDevices: UsbDevice[];
+  bluetoothDevices: BluetoothDevice[];
+};
 
-type BIOS = {
-    manufacturer?: string
-    version: number
-}
+export type Battery = {
+  fullChargeCapacity: number;
+  designCapacity: number;
+};
 
-type ComputerSystem = {
-    name?: string
-}
+export type BIOS = {
+  manufacturer: string;
+  version: string;
+};
 
-type CPU = {
-    name?: string
-    cores: number
-    numberOfLogicalProcessors: number
-    l1InstructionCacheSize: number
-    l1DataCacheSize: number
-    l2CacheSize: number
-    l3CacheSize: number
-}
+export type ComputerSystem = {
+  name: string;
+  vendor: string;
+};
 
-type Motherboard = {
-    manufacturer?: string
-    product?: string
-}
+export type CPU = {
+  name: string;
+  cores: number;
+  numberOfLogicalProcessors: number;
+  l1InstructionCacheSize: number;
+  l1DataCacheSize: number;
+  l2CacheSize: number;
+  l3CacheSize: number;
+};
 
-type Mouse = {
-    name?: string
-    manufacturer?: string
-}
+export type Motherboard = {
+  manufacturer: string;
+  product: string;
+};
 
-type OS = {
-    name?: string
-    versionString?: string
-}
+export type Mouse = {
+  name: string;
+  manufacturer: string;
+};
 
-type SoundDevice = {
-    name?: string
-    manufacturer?: string
-}
+export type OS = {
+  name: string;
+  versionString: string;
+};
+
+export type SoundDevice = {
+  name: string;
+  manufacturer: string;
+};
+
+export type UsbDevice = {
+  name: string;
+  interfaces: UsbInterface[];
+};
+
+export type UsbInterface = {
+  id: number;
+  typeString: string;
+};
+
+export type BluetoothDevice = {
+  address: string;
+  name: string;
+  type: string;
+  connected: boolean;
+  profiles: BluetoothProfile[];
+};
+
+export type BluetoothProfile = {
+  name: string;
+  uuid: string;
+};

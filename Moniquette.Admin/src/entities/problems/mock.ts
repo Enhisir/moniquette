@@ -1,26 +1,36 @@
-import { ProblemType, type Problem } from "./types";
+import { ThreatType, type Threat } from "./types";
 
-export const noteWrongRam: Problem = {
-    type: ProblemType.Note,
-    message: "Объем оперативной памяти устройства <= 4 гб. Возможно, клиент запущен на виртуальной машине."
+export const noteWrongRam: Threat = {
+    type: ThreatType.Note,
+    details: "Объем оперативной памяти устройства <= 4 гб. Возможно, клиент запущен на виртуальной машине.",
+    id: "",
+    timestamp: ""
 }
 
-export const noteWrongDevices: Problem = {
-    type: ProblemType.Note,
-    message: "Подозрительные устройства в конфигурации оборудования. Возможно, клиент запущен на виртуальной машине."
+export const noteWrongDevices: Threat = {
+    type: ThreatType.Note,
+    details: "Подозрительные устройства в конфигурации оборудования. Возможно, клиент запущен на виртуальной машине.",
+    id: "",
+    timestamp: ""
 }
 
-export const criticalWrongConnection: Problem = {
-    type: ProblemType.Critical,
-    message: "Обнаружено стороннее сетевое подключение."
+export const criticalWrongConnection: Threat = {
+    type: ThreatType.Critical,
+    details: "Обнаружено стороннее сетевое подключение.",
+    id: "",
+    timestamp: ""
 }
 
-export const criticalWrongApplication: Problem = {
-    type: ProblemType.Critical,
-    message: "Обнаружено подозрительное приложение."
+export const criticalWrongApplication: Threat = {
+    type: ThreatType.Critical,
+    details: "Обнаружено подозрительное приложение.",
+    id: "",
+    timestamp: ""
 }
 
-export const criticalWrongDockerContainer: Problem = {
-    type: ProblemType.Critical,
-    message: "Обнаружен подозрительный Docker-контейнер."
+export const criticalWrongDockerContainer: Threat = {
+    type: ThreatType.Critical,
+    details: "Обнаружен подозрительный Docker-контейнер.",
+    id: "",
+    timestamp: ""
 }

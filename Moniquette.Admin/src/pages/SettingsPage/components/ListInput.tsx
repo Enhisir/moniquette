@@ -8,14 +8,26 @@ type ListInputProps = {
   onToggle: (v: boolean) => void;
 };
 
-export const ListInput = ({ label, list, setList, enabled, onToggle }: ListInputProps) => {
+export const ListInput = ({
+  label,
+  list,
+  setList,
+  enabled,
+  onToggle,
+}: ListInputProps) => {
   const [value, setValue] = useState("");
 
   const addItem = () => {
-    if (value.trim() !== "") {
-      setList([...list, value.trim()]);
+    const trimmed = value.trim().toLowerCase();
+
+    if (!trimmed) return;
+    if (list.includes(trimmed)) {
       setValue("");
+      return;
     }
+
+    setList([...list, trimmed]);
+    setValue("");
   };
 
   const removeItem = (index: number) => {
@@ -23,47 +35,53 @@ export const ListInput = ({ label, list, setList, enabled, onToggle }: ListInput
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* Toggle всегда активен */}
+    <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <input
           type="checkbox"
-          className="w-5 h-5 border border-black rounded"
+          className="h-5 w-5 rounded border border-black"
           checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
         />
         <span className="text-base text-black">{label}</span>
       </div>
 
-      {/* Список и поле ввода только если включено */}
-      <div className={`${!enabled ? "opacity-50" : ""} max-w-[400px] flex gap-2`}>
+      <div className={`${!enabled ? "opacity-50" : ""} flex max-w-[520px] gap-2`}>
         <input
           type="text"
-          className="border border-black rounded px-2 py-1 flex-1"
+          className="flex-1 rounded border border-black px-3 py-2"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          disabled={!enabled} // реально блокируем ввод
+          disabled={!enabled}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addItem();
+            }
+          }}
         />
         <button
-          className="bg-gray-300 px-3 rounded hover:bg-gray-400 disabled:opacity-50"
+          type="button"
+          className="rounded bg-gray-200 px-4 py-2 transition hover:bg-gray-300 disabled:opacity-50"
           onClick={addItem}
-          disabled={!enabled} // кнопка тоже блокируется
+          disabled={!enabled}
         >
           Добавить
         </button>
       </div>
 
-      <ul className="max-w-[400px] flex flex-col gap-1">
+      <ul className="flex max-w-[520px] flex-col gap-2">
         {list.map((item, idx) => (
           <li
-            key={idx}
-            className={`${!enabled ? "opacity-50" : ""} flex justify-between items-center border border-gray-300 rounded px-2 py-1`}
+            key={`${item}-${idx}`}
+            className={`${!enabled ? "opacity-50" : ""} flex items-center justify-between rounded border border-gray-300 bg-gray-50 px-3 py-2`}
           >
             <span>{item}</span>
             <button
-              className="text-xl font-bold text-red-400"
+              type="button"
+              className="text-xl font-bold text-red-400 hover:text-red-600 disabled:opacity-50"
               onClick={() => removeItem(idx)}
-              disabled={!enabled} // удаление тоже блокируем
+              disabled={!enabled}
             >
               ×
             </button>

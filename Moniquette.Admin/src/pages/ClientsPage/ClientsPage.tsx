@@ -1,24 +1,29 @@
 import { useState } from "react";
-import type { Client } from "@/entities/client/types";
-import { defaultClient, clientWithCriticals, clientWithNotes, realClient } from "@/entities/client/mock";
+import type { ClientSession } from "@/entities/client/types";
+import {
+  defaultClient,
+  clientWithCriticals,
+  clientWithNotes,
+  realClient,
+} from "@/entities/client/mock";
 import { ClientList } from "./components/ClientList/ClientList";
 import { ClientDetailsPanel } from "./components/ClientDetailsPanel/ClientDetailsPanel";
 
 export const ClientsPage = () => {
-
-  const [clients, setClients] = useState<Client[]>([
+  const [clients] = useState<ClientSession[]>([
     realClient,
-    defaultClient,
-    clientWithNotes,
-    clientWithCriticals
+    // defaultClient,
+    // clientWithNotes,
+    // clientWithCriticals,
   ]);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  const [selectedClient, setSelectedClient] = useState<ClientSession | null>(null);
 
   return (
-    <div className="h-full min-h-0 p-6 flex gap-6">
+    <div className="flex h-full min-h-0 gap-6 p-6">
       <ClientList
         clients={clients}
-        selectedSessionId={selectedClient?.sessionId}
+        selectedSessionId={selectedClient?.session.id}
         onSelect={setSelectedClient}
       />
       <ClientDetailsPanel client={selectedClient} />

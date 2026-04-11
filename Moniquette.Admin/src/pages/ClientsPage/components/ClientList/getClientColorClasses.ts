@@ -1,4 +1,4 @@
-import { ProblemType } from "@/entities/problems/types";
+import { ThreatType } from "@/entities/problems/types";
 
 export type ClientColorClasses = {
   bg: string;
@@ -7,17 +7,17 @@ export type ClientColorClasses = {
 };
 
 export const getClientColorClasses = (
-  status: ProblemType | null
+  status: ThreatType | null
 ): ClientColorClasses => {
   switch (status) {
-    case ProblemType.Critical:
+    case ThreatType.Critical:
       return {
         bg: "bg-red-100 hover:bg-red-200",
         text: "text-red-700",
         badge: "bg-red-300",
       };
 
-    case ProblemType.Note:
+    case ThreatType.Note:
       return {
         bg: "bg-yellow-100 hover:bg-yellow-200",
         text: "text-yellow-700",

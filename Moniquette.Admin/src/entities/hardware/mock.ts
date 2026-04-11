@@ -1,91 +1,144 @@
-import type { Hardware } from "./types";
+import type { HardwareBriefInfo } from "./types";
 
-export const msiKatana17HardwareMock: Hardware = {
+export const msiKatana17HardwareMock: HardwareBriefInfo = {
   operatingSystem: "Debian GNU/Linux 12",
-  availableRam: 34_359_738_368,
-
+  availableRam: 33338351616,
+  battery: {
+    fullChargeCapacity: 2926000,
+    designCapacity: 4562000,
+  },
   bios: {
     manufacturer: "American Megatrends International, LLC.",
-    version: 1.12,
+    version: "E17L5IMS.308",
   },
-
   computerSystem: {
-    name: "MSI Katana 17 B12VGK",
+    name: "Katana 17 B12VGK",
+    vendor: "Micro-Star International Co., Ltd.",
   },
-
   cpu: {
-    name: "Intel Core i7-12700H",
-    cores: 14,
-    numberOfLogicalProcessors: 20,
-    l1InstructionCacheSize: 640,
-    l1DataCacheSize: 768,
-    l2CacheSize: 12288,
-    l3CacheSize: 24576,
+    name: "12th Gen Intel(R) Core(TM) i7-12650H",
+    cores: 10,
+    numberOfLogicalProcessors: 16,
+    l1InstructionCacheSize: 32768,
+    l1DataCacheSize: 49152,
+    l2CacheSize: 1310720,
+    l3CacheSize: 25165824,
   },
-
   motherboard: {
     manufacturer: "Micro-Star International Co., Ltd.",
-    product: "MS-1583",
+    product: "MS-17L5",
   },
-
   mouseList: [
     {
-      name: "HID-compliant mouse",
-      manufacturer: "Microsoft",
+      name: "MSNB0001:00 04F3:30AA Mouse",
+      manufacturer: "",
     },
   ],
-
   soundDeviceList: [
     {
-      name: "Realtek High Definition Audio",
-      manufacturer: "Realtek Semiconductor Corp.",
+      name: "Intel Corporation Alder Lake PCH-P High Definition Audio Controller (rev 01)",
+      manufacturer: "",
     },
+  ],
+  usbDevices: [],
+  bluetoothDevices: [
     {
-      name: "NVIDIA High Definition Audio",
-      manufacturer: "NVIDIA",
+      address: "AC:80:0A:DC:44:F2",
+      name: "WH-1000XM5",
+      type: "unknown",
+      connected: true,
+      profiles: [
+        {
+          name: "Vendor specific",
+          uuid: "00000000-deca-fade-deca-deafdecacaff",
+        },
+        {
+          name: "Headset",
+          uuid: "00001108-0000-1000-8000-00805f9b34fb",
+        },
+        {
+          name: "Audio Sink",
+          uuid: "0000110b-0000-1000-8000-00805f9b34fb",
+        },
+        {
+          name: "A/V Remote Control Target",
+          uuid: "0000110c-0000-1000-8000-00805f9b34fb",
+        },
+        {
+          name: "Advanced Audio Distribution",
+          uuid: "0000110d-0000-1000-8000-00805f9b34fb",
+        },
+      ],
     },
   ],
 };
 
-export const virtualBoxHardwareMock: Hardware = {
-  operatingSystem: "Debian GNU/Linux 12",
-  availableRam: 4_294_967_296,
-
+export const virtualBoxHardwareMock: HardwareBriefInfo = {
+  operatingSystem: "Microsoft Windows 10 Pro",
+  availableRam: 2147483648,
+  battery: undefined,
   bios: {
-    manufacturer: "Phoenix Technologies LTD",
-    version: 1.0,
+    manufacturer: "innotek GmbH",
+    version: "VirtualBox",
   },
-
   computerSystem: {
-    name: "VirtualBox VM",
+    name: "VirtualBox",
+    vendor: "Oracle Corporation",
   },
-
   cpu: {
-    name: "Intel Core i7 (Virtual CPU)",
-    cores: 2, // Обычно VM выдаёт меньше ядер
+    name: "Intel(R) Core(TM) i5 Virtual CPU",
+    cores: 2,
     numberOfLogicalProcessors: 2,
-    l1InstructionCacheSize: 32,
-    l1DataCacheSize: 32,
-    l2CacheSize: 256,
-    l3CacheSize: 4096,
+    l1InstructionCacheSize: 32768,
+    l1DataCacheSize: 32768,
+    l2CacheSize: 262144,
+    l3CacheSize: 0,
   },
-
   motherboard: {
     manufacturer: "Oracle Corporation",
     product: "VirtualBox",
   },
-
   mouseList: [
     {
-      name: "PS/2 Compatible Mouse",
-      manufacturer: "VirtualBox",
+      name: "Virtual USB Tablet",
+      manufacturer: "Oracle",
     },
   ],
-
   soundDeviceList: [
     {
-      name: "Intel HD Audio",
-      manufacturer: "VirtualBox",
+      name: "Virtual Audio Device",
+      manufacturer: "Oracle",
+    },
+  ],
+  usbDevices: [
+    {
+      name: "Android Phone",
+      interfaces: [
+        { id: 0, typeString: "MTP" },
+        { id: 1, typeString: "ADB" },
+      ],
+    },
+    {
+      name: "VirtualBox USB",
+      interfaces: [{ id: 0, typeString: "Generic USB" }],
+    },
+  ],
+  bluetoothDevices: [
+    {
+      address: "34:AB:12:CD:EF:90",
+      name: "Galaxy S24",
+      type: "phone",
+      connected: true,
+      profiles: [
+        {
+          name: "Handsfree",
+          uuid: "0000111e-0000-1000-8000-00805f9b34fb",
+        },
+        {
+          name: "Phonebook Access",
+          uuid: "0000112f-0000-1000-8000-00805f9b34fb",
+        },
+      ],
     },
   ],
 };
