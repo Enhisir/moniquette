@@ -11,10 +11,13 @@ using Moniquette.Client.Config;
 using Moniquette.Client.Pipeline.Fillers;
 using Moniquette.Client.Services;
 using Moniquette.Client.Services.Abstractions;
+using Moniquette.Client.Services.Linux;
+using Moniquette.Client.Services.Windows;
 using Moniquette.Common.Api;
 using Moniquette.Common.Utils;
 using Moniquette.ProcessObserver.Services;
 using Tmds.DBus.Protocol;
+using LinuxBluetoothDevicesService = Moniquette.Client.Services.Linux.LinuxBluetoothDevicesService;
 
 namespace Moniquette.Client.Extensions;
 
@@ -30,18 +33,12 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddServices(this IServiceCollection services)
         => services
-            .AddProcessObserving()
-            .AddSingleton<GnomeWindowsExtensionService>(_ =>
-            {
-                var connection = new Connection(Address.Session!);
-                connection.ConnectAsync().ConfigureAwait(true);
-                return new GnomeWindowsExtensionService(connection);
-            })
-            .AddScoped<WmctrlService>()
+            .AddTransient<OperatingSystemService>() // IHardwareInfo must be enabled
             .AddScoped<IUsbDevicesService, UsbDevicesService>()
-            .AddBluetoothServices();
+            .AddProcessObserving()
+            .AddPlatformSpecificServices();
 
-    private static IServiceCollection AddBluetoothServices(this IServiceCollection services)
+    private static IServiceCollection AddPlatformSpecificServices(this IServiceCollection services)
     {
         var service = services.BuildServiceProvider().GetService<OperatingSystemService>();
         if (service is null)
@@ -52,10 +49,19 @@ public static class ServiceCollectionExtensions
         switch (service.GetOperatingSystem())
         {
             case Literals.Linux:
-                services.AddScoped<IBluetoothDevicesService, LinuxBluetoothDevicesService>();
+                services
+                    .AddScoped<IBluetoothDevicesService, LinuxBluetoothDevicesService>()
+                    .AddScoped<IDockerService, LinuxDockerService>()
+                    .AddSingleton<WaylandGnomeActiveViewService>(_ =>
+                    {
+                        var connection = new Connection(Address.Session!);
+                        connection.ConnectAsync().ConfigureAwait(true);
+                        return new WaylandGnomeActiveViewService(connection);
+                    })
+                    .AddScoped<X11ActiveViewService>();
                 break;
             case Literals.Windows:
-                // add windows service
+                services.AddScoped<IDockerService, WindowsDockerService>();
                 break;
             default:
                 // add logging and throw error
@@ -94,19 +100,17 @@ public static class ServiceCollectionExtensions
                 var hardwareInfo = new HardwareInfo();
                 hardwareInfo.RefreshAll();
                 return hardwareInfo;
-            })
-            .AddTransient<OperatingSystemService>(); // HardwareInfo must be enabled
+            });
 
     public static IServiceCollection AddFillers(
         this IServiceCollection services)
         => services
             .AddTransient<IReportFiller, HardwareFiller>()
             .AddTransient<IReportFiller, NetworkFiller>()
-            .AddTransient<IReportFiller, ProcessFiller>()
-            .AddTransient<IReportFiller, ActiveViewFiller>()
+            // .AddTransient<IReportFiller, ProcessFiller>()
+            // .AddTransient<IReportFiller, ActiveViewFiller>()
             .AddTransient<IReportFiller, WindowsRegistryFiller>()
             .AddTransient<IReportFiller, DockerFiller>();
-    // .AddTransient<IReportFiller, BluetoothDevicesFiller>();
 
     public static IServiceCollection AddGrpcChannel(this IServiceCollection services)
         => services

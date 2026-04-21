@@ -5,7 +5,7 @@ using Moniquette.Common.Exceptions;
 using Moniquette.Common.Models.Hardware;
 using Moniquette.Common.Utils;
 
-namespace Moniquette.Client.Services;
+namespace Moniquette.Client.Services.Linux;
 
 public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
 {
@@ -57,7 +57,6 @@ public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
         return result;
     }
 
-
     private static BluetoothDevice? ParseDeviceInfo(string text)
     {
         BluetoothDevice? device = null;
@@ -84,6 +83,13 @@ public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
                 continue;
             }
 
+            var classMatch = ClassRegex().Match(line);
+            if (classMatch.Success)
+            {
+                device.Class = classMatch.Groups[1].Value.Trim();
+                continue;
+            }
+
             var connectedMatch = ConnectedRegex().Match(line);
             if (connectedMatch.Success)
             {
@@ -104,7 +110,6 @@ public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
                     Name = uuidMatch.Groups[1].Value.Trim(),
                     Uuid = uuidMatch.Groups[2].Value.Trim()
                 });
-                continue;
             }
         }
 
@@ -119,6 +124,9 @@ public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
 
     [GeneratedRegex(@"^\s*Name:\s*(.+)$")]
     private static partial Regex DeviceNameRegex();
+
+    [GeneratedRegex(@"^\s*Class:\s*(.+)$")]
+    private static partial Regex ClassRegex();
 
     [GeneratedRegex(@"^\s*Connected:\s*(.+)$")]
     private static partial Regex ConnectedRegex();

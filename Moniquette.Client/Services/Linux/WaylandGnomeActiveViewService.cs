@@ -1,11 +1,10 @@
 using System.Text.Json;
-using Moniquette.Common.Dto;
 using Moniquette.Common.Models;
 using Tmds.DBus.Protocol;
 
-namespace Moniquette.Client.Services;
+namespace Moniquette.Client.Services.Linux;
 
-public class GnomeWindowsExtensionService(Connection dbusConnection)
+public class WaylandGnomeActiveViewService(Connection dbusConnection)
 {
     private const string Peer = "org.gnome.Shell";
     private const string Interface = "org.gnome.Shell.Extensions.WindowsExt";

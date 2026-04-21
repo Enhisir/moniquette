@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Moniquette.Client.Services;
+using Moniquette.Client.Services.Linux;
 using Moniquette.Common.Models;
 using Moniquette.Common.Utils;
 
@@ -8,8 +9,8 @@ namespace Moniquette.Client.Pipeline.Fillers;
 
 public class ActiveViewFiller(
     OperatingSystemService operatingSystemService,
-    WmctrlService wmctrlService,
-    GnomeWindowsExtensionService gnomeService,
+    X11ActiveViewService x11ActiveViewService,
+    WaylandGnomeActiveViewService waylandGnomeService,
     ILogger<ActiveViewFiller> logger
     ) : IReportFiller
 {
@@ -22,7 +23,7 @@ public class ActiveViewFiller(
         var views = await GetViews();
         report.Processes.ForEach(p =>
         {
-            var pidView = views.SingleOrDefault(v => v.Pid.Equals(p.Pid));
+            var pidView = views.FirstOrDefault(v => v.Pid.Equals(p.Pid)); // TODO: проследи
             var classView = views.FirstOrDefault(v => v.Class.Equals(p.Name, StringComparison.InvariantCultureIgnoreCase));
             p.Title ??= pidView?.Title ?? classView?.Title;
         });
@@ -65,13 +66,13 @@ public class ActiveViewFiller(
     {
         if (!LinuxUtils.CheckSessionUsesWayland())
         {
-            return wmctrlService.GetX11Views();
+            return x11ActiveViewService.GetX11Views();
         }
         
         Console.WriteLine("uses wayland");
         return LinuxUtils.GetDesktopEnvironment() switch
         {
-            Literals.GNOME => await gnomeService.ListActiveViews(),
+            Literals.GNOME => await waylandGnomeService.ListActiveViews(),
             Literals.KDE => [],
             _ => []
         };

@@ -4,5 +4,7 @@ public class UsbInterface
 {
     public int Id { get; set; }
 
-    public string TypeString { get; set; } = null!;
+    public byte ClassCode { get; set; }
+    
+    public byte HidProtocol { get; set; }
 }

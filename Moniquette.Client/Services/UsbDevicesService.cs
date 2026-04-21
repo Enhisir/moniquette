@@ -1,4 +1,4 @@
-using LibUsbDotNet.Main;
+using LibUsbDotNet.LibUsb;
 using Moniquette.Client.Services.Abstractions;
 using Moniquette.Common.Models.Hardware;
 using UsbDevice = Moniquette.Common.Models.Hardware.UsbDevice;
@@ -9,50 +9,31 @@ public class UsbDevicesService : IUsbDevicesService
 {
     public List<UsbDevice> GetAttached()
     {
-        var deviceList = LibUsbDotNet.UsbDevice.AllDevices;
+        using var context = new UsbContext();
+        var deviceList = context.List();
 
         var attachedUsbDevices = new List<UsbDevice>();
-        foreach (UsbRegistry registry in deviceList)
-        {
-            var usb = GetDeviceFromRegistry(registry);
-            if (usb is not null)
-            {
-                attachedUsbDevices.Add(usb);
-            }
-        }
-
-        return attachedUsbDevices;
-    }
-
-    private UsbDevice? GetDeviceFromRegistry(UsbRegistry registry)
-    {
-        if (!registry.Open(out var device)) return null;
-        try
+        foreach (var device in deviceList)
         {
             var usb = new UsbDevice
             {
-                Name = registry.Name,
+                Name = $"{device.Info.Manufacturer} {device.Info.Product}", // TODO: добавить имя, на Linux не работает
+                VendorId = device.VendorId,
+                ProductId = device.ProductId,
+                Class = device.Info.DeviceClass,
                 Interfaces = device.Configs
-                    .SelectMany(cfg => cfg.InterfaceInfoList)
-                    .Select(inf => new UsbInterface
+                    .SelectMany(cfg => cfg.Interfaces)
+                    .Select(uIntInfo => new UsbInterface
                     {
-                        Id = inf.Descriptor.InterfaceID,
-                        TypeString = Enum.GetName(inf.Descriptor.Class)?.ToLowerInvariant() ?? "unknown"
+                        Id = uIntInfo.Number,
+                        ClassCode = (byte) uIntInfo.Class,
+                        HidProtocol = uIntInfo.Protocol 
                     })
                     .ToList()
             };
-            return usb;
+            attachedUsbDevices.Add(usb);
         }
-        catch (Exception e)
-        {
-            // Log Message
-            // Console.WriteLine(e);
-            // throw;
-            return null;
-        }
-        finally
-        {
-            device.Close();
-        }
+
+        return attachedUsbDevices;
     }
 }

@@ -1,9 +1,9 @@
 using Moniquette.Common.Models;
 using LinuxUtils = Moniquette.Common.Utils.LinuxUtils;
 
-namespace Moniquette.Client.Services;
+namespace Moniquette.Client.Services.Linux;
 
-public class WmctrlService
+public class X11ActiveViewService
 {
     public List<ActiveView> GetX11Views()
     {
