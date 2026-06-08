@@ -17,28 +17,28 @@ export const ClientListItem = ({
   const { session, threats } = client;
 
   const criticalCount = threats.filter(
-    (p: Threat) => p.type === ThreatType.Critical
+    (p: Threat) => p.type === ThreatType.Threat
   ).length;
 
   const noteCount = threats.filter(
-    (p: Threat) => p.type === ThreatType.Note
+    (p: Threat) => p.type === ThreatType.Warning
   ).length;
 
   const totalCount = threats.length;
 
   const status: ThreatType | null =
     criticalCount > 0
-      ? ThreatType.Critical
+      ? ThreatType.Threat
       : noteCount > 0
-        ? ThreatType.Note
+        ? ThreatType.Warning
         : null;
 
   const colorClasses = getClientColorClasses(status);
 
   const problemBgText =
-    status === ThreatType.Critical
+    status === ThreatType.Threat
       ? "Проблемы:"
-      : status === ThreatType.Note
+      : status === ThreatType.Warning
         ? "Замечания:"
         : "Нет замечаний";
 

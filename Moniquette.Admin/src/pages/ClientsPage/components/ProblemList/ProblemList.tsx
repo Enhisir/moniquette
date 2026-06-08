@@ -16,8 +16,8 @@ export const ProblemList = ({ problems }: Props) => {
 };
 
 const compareProblems = (a: Threat, b: Threat) =>
-  a.type === ThreatType.Critical
+  a.type === ThreatType.Threat
     ? -1
-    : b.type === ThreatType.Critical
+    : b.type === ThreatType.Threat
       ? 1
       : a.details.localeCompare(b.details);

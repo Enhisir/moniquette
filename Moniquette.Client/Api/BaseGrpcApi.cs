@@ -1,4 +1,5 @@
 using Google.Protobuf;
+using Grpc.Core;
 using Grpc.Net.Client;
 using MessagePack;
 using Moniquette.Common.Api;
@@ -12,6 +13,7 @@ namespace Moniquette.Client.Api;
 public class BaseGrpcApi(GrpcChannel grpcChannel) : IBaseApi
 {
     private gRPC.ReportService.ReportServiceClient Client { get; } = new(grpcChannel);
+    private string? BearerToken { get; set; }
     
     // private AsyncClientStreamingCall<gRPC.ReportMessage, Empty>? SendReportCall { get; set; }
 
@@ -39,7 +41,12 @@ public class BaseGrpcApi(GrpcChannel grpcChannel) : IBaseApi
             }
             
             // SendReportCall = Client.SendReportStream(cancellationToken: ct);
-            return Results.Ok(new RegistrationResponseDto { Token = response.Token });
+            BearerToken = response.Token;
+            return Results.Ok(new RegistrationResponseDto
+            {
+                Token = response.Token,
+                SessionId = response.SessionId
+            });
         }
         catch (Exception e)
         {
@@ -63,7 +70,7 @@ public class BaseGrpcApi(GrpcChannel grpcChannel) : IBaseApi
             var bytes = byteStream.ToArray();
             var data = ByteString.CopyFrom(bytes); // ends null
             var reportMessage = new gRPC.ReportMessage { Data = data };
-            await Client.SendReportAsync(reportMessage, cancellationToken: ct);
+            await Client.SendReportAsync(reportMessage, CreateAuthMetadata(), cancellationToken: ct);
             return Results.Ok();
         }
         catch (Exception e)
@@ -71,4 +78,9 @@ public class BaseGrpcApi(GrpcChannel grpcChannel) : IBaseApi
             return Results.Error(e.Message);
         }
     }
+
+    private Metadata CreateAuthMetadata()
+        => string.IsNullOrWhiteSpace(BearerToken)
+            ? []
+            : [new Metadata.Entry("authorization", $"Bearer {BearerToken}")];
 }

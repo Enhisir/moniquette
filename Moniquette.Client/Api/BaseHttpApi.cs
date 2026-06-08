@@ -17,13 +17,21 @@ public class BaseHttpApi(
     
     private HttpClient HttpClient { get; } = httpClientFactory.CreateClient(nameof(BaseHttpApi));
     
+    private string? BearerToken { get; set; }
+    
     public async Task<IApiResult> RegisterAsync(
         RegistrationRequestDto requestDto, 
         CancellationToken cancellationToken = default)
     {
         var uriBuilder = BuildCustomUri(Config.BaseHttpAddress, Routes.Registration);
         var httpResponse = await HttpClient.PostAsJsonAsync(uriBuilder.Uri, requestDto, cancellationToken);
-        return await GetIApiResult<RegistrationResponseDto>(httpResponse);
+        var result = await GetIApiResult<RegistrationResponseDto>(httpResponse);
+        if (result is ApiOk<RegistrationResponseDto> { Value: not null } ok)
+        {
+            BearerToken = ok.Value.Token;
+        }
+
+        return result;
     }
     
     // public async Task<IApiResult> SendPing(Report report) // нужно пинговать чаще
@@ -33,6 +41,12 @@ public class BaseHttpApi(
         CancellationToken cancellationToken = default)
     {
         var uriBuilder = BuildCustomUri(Config.BaseHttpAddress, Routes.SendReport);
+        if (!string.IsNullOrWhiteSpace(BearerToken))
+        {
+            HttpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", BearerToken);
+        }
+
         var httpResponse = await HttpClient.PostAsJsonAsync(uriBuilder.Uri, request, cancellationToken);
         return await GetIApiResult(httpResponse);
     }

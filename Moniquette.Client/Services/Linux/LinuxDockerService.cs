@@ -10,23 +10,11 @@ public class LinuxDockerService : IDockerService
 
     private const string GetContainersLinuxCommand =
         """
-        docker ps -q | while read cid; do
-          name=$(docker inspect --format='{{.Name}}' "$cid" | sed 's/^\/\(.*\)/\1/')
-          imagename=$(docker inspect --format='{{.Config.Image}}' "$cid")
-          digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$imagename" 2>/dev/null)
-          echo -e "$name\t$imagename\t${digest:-<no-digest>}"
-        done | column -t
+        docker ps --format '{{.Names}}\t{{.Image}}' | while IFS='	' read -r name imagename; do
+          digest=$(docker image inspect --format='{{index .RepoDigests 0}}' "$imagename" 2>/dev/null)
+          printf '%s\t%s\t%s\n' "$name" "$imagename" "${digest:-}"
+        done
         """;
-
-    // TODO: Заменить
-    /*
-     * docker ps -q | while read cid; do
-         name=$(docker inspect --format='{{.Name}}' "$cid" | sed 's/^\/\(.*\)/\1/')
-         imagename=$(docker inspect --format='{{.Config.Image}}' "$cid")
-         digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$imagename" 2>/dev/null)
-         echo -e "$name\t$imagename\t${digest:-<no-digest>}"
-       done | column -t
-     */
 
     public bool CheckDockerIsRunning()
     {
@@ -51,14 +39,16 @@ public class LinuxDockerService : IDockerService
                 .Split(Environment.NewLine)
                 .Select(line =>
                 {
-                    var info = line.Trim().Split().Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+                    var info = line.Split('\t');
                     return new RunningDockerContainer
                     {
-                        ImageDigest = info[0],
-                        Name = info[1],
-                        ImageName = info[2]
+                        Name = info.ElementAtOrDefault(0) ?? string.Empty,
+                        ImageName = info.ElementAtOrDefault(1) ?? string.Empty,
+                        ImageDigest = info.ElementAtOrDefault(2) ?? string.Empty
                     };
                 })
+                .Where(container => !string.IsNullOrWhiteSpace(container.Name)
+                                    && !string.IsNullOrWhiteSpace(container.ImageName))
                 .ToList();
     }
 }

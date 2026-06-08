@@ -4,6 +4,7 @@ import type { NetworkConnection } from "@/entities/network/types";
 import type { ProcessInfo } from "@/entities/process/types";
 
 export type Report = {
+  id: string;
   sessionId: string;
   timestamp: string;
   processes: ProcessInfo[];

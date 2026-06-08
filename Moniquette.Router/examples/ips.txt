@@ -1,0 +1,4 @@
+# Static IPs/CIDRs that are always allowed.
+# Put the teacher/server address here if it is reached through WAN/VPN.
+# Local LAN traffic is not filtered by this script.
+1.1.1.1

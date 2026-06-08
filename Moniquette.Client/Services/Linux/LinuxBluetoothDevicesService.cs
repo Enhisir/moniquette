@@ -87,6 +87,7 @@ public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
             if (classMatch.Success)
             {
                 device.Class = classMatch.Groups[1].Value.Trim();
+                device.ClassOfDevice = ParseClassOfDevice(device.Class);
                 continue;
             }
 
@@ -133,4 +134,19 @@ public partial class LinuxBluetoothDevicesService : IBluetoothDevicesService
 
     [GeneratedRegex(@"^\s*UUID:\s*(.+?)\s+\(([0-9A-Fa-f-]+)\)$")]
     private static partial Regex UuidRegex();
+
+    private static uint ParseClassOfDevice(string value)
+    {
+        var normalized = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+            ? value[2..]
+            : value;
+
+        return uint.TryParse(
+            normalized,
+            System.Globalization.NumberStyles.HexNumber,
+            System.Globalization.CultureInfo.InvariantCulture,
+            out var result)
+            ? result
+            : 0;
+    }
 }

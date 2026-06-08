@@ -1,13 +1,17 @@
 using Moniquette.Client.Services.Abstractions;
 using Moniquette.Common.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Moniquette.Client.Pipeline.Fillers;
 
-public class DockerFiller(IDockerService service) : IReportFiller
+public class DockerFiller(
+    IDockerService service,
+    ILogger<DockerFiller> logger) : IReportFiller
 {
     public Task<Report> Fill(Report request, CancellationToken cancellationToken)
     {
-        if (service.CheckDockerIsRunning())
+        request.IsDockerEnabled = service.CheckDockerIsRunning();
+        if (request.IsDockerEnabled)
         {
             try
             {
@@ -16,8 +20,8 @@ public class DockerFiller(IDockerService service) : IReportFiller
             }
             catch (Exception e)
             {
-                // TODO: log exception
-                request.DockerContainers = null;
+                logger.LogWarning(e, "Docker is running, but running containers could not be collected.");
+                request.DockerContainers = [];
             }
         }
         return Task.FromResult(request);

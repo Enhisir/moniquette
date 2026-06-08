@@ -1,0 +1,4 @@
+# One domain per line. Comments and empty lines are ignored.
+# Example educational resources:
+example.edu
+wikipedia.org

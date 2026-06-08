@@ -10,14 +10,14 @@ export const getClientColorClasses = (
   status: ThreatType | null
 ): ClientColorClasses => {
   switch (status) {
-    case ThreatType.Critical:
+    case ThreatType.Threat:
       return {
         bg: "bg-red-100 hover:bg-red-200",
         text: "text-red-700",
         badge: "bg-red-300",
       };
 
-    case ThreatType.Note:
+    case ThreatType.Warning:
       return {
         bg: "bg-yellow-100 hover:bg-yellow-200",
         text: "text-yellow-700",

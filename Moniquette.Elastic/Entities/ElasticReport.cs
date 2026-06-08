@@ -4,11 +4,15 @@ namespace Moniquette.Elastic.Entities;
 
 public class ElasticReport
 {
+    public Guid Id { get; set; }
+    
     public Guid SessionId { get; set; }
     
     public DateTime Timestamp { get; set; }
     
     public List<Guid> ProcessIds { get; set; } = [];
+
+    public List<ElasticReportProcess> Processes { get; set; } = [];
     
     public HardwareBriefInfo HardwareInfo { get; set; } = null!;
     
