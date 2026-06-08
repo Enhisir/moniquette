@@ -12,7 +12,7 @@ public class ElasticProcessInfo
     
     public string ExecutablePath { get; set; } = string.Empty;
 
-    public long[] Signature { get; set; } = null!;
+    public long[] Signature { get; set; } = [];
     
-    public float[] Bands { get; set; } = null!;
+    public long[] Bands { get; set; } = [];
 }

@@ -10,5 +10,9 @@ public class UsbDevice
     
     public byte Class { get; set; }
 
+    public byte SubClass { get; set; }
+
+    public byte Protocol { get; set; }
+
     public List<UsbInterface> Interfaces { get; set; } = null!;
 }

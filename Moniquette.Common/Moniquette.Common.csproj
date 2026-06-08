@@ -19,15 +19,9 @@
 
     <ItemGroup>
       <None Remove="Protos\report.proto" />
-      <Protobuf Include="Protos\report.proto">
+      <Protobuf Include="Protos\report.proto" GrpcServices="Both">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Protobuf>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="MessagePack">
-        <HintPath>..\..\..\.nuget\packages\messagepack\3.1.4\lib\net9.0\MessagePack.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>

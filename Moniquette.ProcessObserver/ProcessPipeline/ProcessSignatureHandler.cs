@@ -22,7 +22,8 @@ public class ProcessSignatureHandler(
             catch (Exception ex)
             {
                 successful = false;
-                // write exception handling
+                Console.Error.WriteLine(
+                    $"Failed to create process signature for '{pInfo.ExecutablePath}': {ex.Message}");
             }
             if (successful)
                 yield return pInfo;

@@ -6,9 +6,9 @@ type Props = {
 
 export const ProblemItem = ({ problem }: Props) => {
   const bgClass =
-    problem.type === ThreatType.Critical
+    problem.type === ThreatType.Threat
       ? "bg-red-300"
-      : problem.type === ThreatType.Note
+      : problem.type === ThreatType.Warning
         ? "bg-yellow-300"
         : "bg-gray-200";
 

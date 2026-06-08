@@ -8,6 +8,8 @@ public class BluetoothDevice
 
     public string Class { get; set; } = null!;
 
+    public uint ClassOfDevice { get; set; }
+
     public List<BluetoothProfile> Profiles { get; } = [];
 }
 

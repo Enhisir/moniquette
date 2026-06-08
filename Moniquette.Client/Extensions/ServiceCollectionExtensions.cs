@@ -104,13 +104,21 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddFillers(
         this IServiceCollection services)
-        => services
+    {
+        services
             .AddTransient<IReportFiller, HardwareFiller>()
             .AddTransient<IReportFiller, NetworkFiller>()
-            // .AddTransient<IReportFiller, ProcessFiller>()
+            .AddTransient<IReportFiller, ProcessFiller>()
             // .AddTransient<IReportFiller, ActiveViewFiller>()
-            .AddTransient<IReportFiller, WindowsRegistryFiller>()
             .AddTransient<IReportFiller, DockerFiller>();
+
+        if (OperatingSystem.IsWindows())
+        {
+            services.AddTransient<IReportFiller, WindowsRegistryFiller>();
+        }
+
+        return services;
+    }
 
     public static IServiceCollection AddGrpcChannel(this IServiceCollection services)
         => services

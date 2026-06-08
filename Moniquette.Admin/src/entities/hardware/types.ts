@@ -59,17 +59,28 @@ export type SoundDevice = {
 
 export type UsbDevice = {
   name: string;
+  vendorId?: number;
+  productId?: number;
+  class?: number;
+  subClass?: number;
+  protocol?: number;
   interfaces: UsbInterface[];
 };
 
 export type UsbInterface = {
   id: number;
+  classCode?: number;
+  subClass?: number;
+  protocol?: number;
+  hidProtocol?: number;
   typeString: string;
 };
 
 export type BluetoothDevice = {
   address: string;
   name: string;
+  class?: string;
+  classOfDevice?: number;
   type: string;
   connected: boolean;
   profiles: BluetoothProfile[];

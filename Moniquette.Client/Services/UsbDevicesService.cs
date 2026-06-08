@@ -21,13 +21,17 @@ public class UsbDevicesService : IUsbDevicesService
                 VendorId = device.VendorId,
                 ProductId = device.ProductId,
                 Class = device.Info.DeviceClass,
+                SubClass = device.Info.DeviceSubClass,
+                Protocol = device.Info.DeviceProtocol,
                 Interfaces = device.Configs
                     .SelectMany(cfg => cfg.Interfaces)
                     .Select(uIntInfo => new UsbInterface
                     {
                         Id = uIntInfo.Number,
                         ClassCode = (byte) uIntInfo.Class,
-                        HidProtocol = uIntInfo.Protocol 
+                        SubClass = (byte) uIntInfo.SubClass,
+                        Protocol = uIntInfo.Protocol,
+                        HidProtocol = uIntInfo.Protocol
                     })
                     .ToList()
             };

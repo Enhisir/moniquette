@@ -9,6 +9,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Moniquette.Server/Moniquette.Server.csproj", "Moniquette.Server/"]
 COPY ["Moniquette.Common/Moniquette.Common.csproj", "Moniquette.Common/"]
+COPY ["Moniquette.Elastic/Moniquette.Elastic.csproj", "Moniquette.Elastic/"]
 RUN dotnet restore "Moniquette.Server/Moniquette.Server.csproj"
 COPY . .
 WORKDIR "/src/Moniquette.Server"

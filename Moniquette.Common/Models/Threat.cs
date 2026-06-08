@@ -10,5 +10,9 @@ public record struct Threat()
     
     public required ThreatType Type { get; init; } = ThreatType.Unknown;
     
+    public required Guid SessionId { get; init; }
+    
+    public required Guid ReportId { get; init; }
+    
     public required string Details { get; init; }
 }

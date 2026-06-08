@@ -14,6 +14,8 @@ namespace Moniquette.Client;
 
 public class Agent(IServiceProvider serviceProvider)
 {
+    private Queue<Report> PendingReports { get; } = [];
+
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var config = GetConfig();
@@ -32,9 +34,11 @@ public class Agent(IServiceProvider serviceProvider)
         {
             try
             {
-                var report = await CreateReportAsync(response.Token, cancellationToken);
+                await FlushPendingReportsAsync(baseApi, cancellationToken);
+
+                var report = await CreateReportAsync(response.SessionId, cancellationToken);
                 Logger.LogInformation("Sending report...\n{report}", JsonSerializer.Serialize(report));
-                await baseApi.SendReportAsync(report, cancellationToken);
+                await SendOrQueueReportAsync(baseApi, report, cancellationToken);
             }
             catch (TaskCanceledException)
             {
@@ -92,14 +96,65 @@ public class Agent(IServiceProvider serviceProvider)
         return null;
     }
 
-    private async Task<Report> CreateReportAsync(string token, CancellationToken ct = default)
+    private async Task<Report> CreateReportAsync(string sessionIdValue, CancellationToken ct = default)
     {
-        var sessionId = Guid.Parse(token);
+        var sessionId = Guid.Parse(sessionIdValue);
         var scopeFactory = serviceProvider.GetService<IServiceScopeFactory>()
                            ?? throw new Exception("An exception occurred while creating a scope");
         using var scope = scopeFactory.CreateScope();
         var reportPipeline = new ReportPipeline(scope.ServiceProvider);
         var report = await reportPipeline.RunAsync(sessionId, ct);
         return report;
+    }
+
+    private async Task FlushPendingReportsAsync(IBaseApi baseApi, CancellationToken cancellationToken)
+    {
+        while (PendingReports.TryPeek(out var pendingReport))
+        {
+            Logger.LogInformation("Retrying queued report {ReportId}. Queue size: {QueueSize}.",
+                pendingReport.Id,
+                PendingReports.Count);
+
+            var sent = await TrySendReportAsync(baseApi, pendingReport, cancellationToken);
+            if (!sent)
+            {
+                return;
+            }
+
+            PendingReports.Dequeue();
+        }
+    }
+
+    private async Task SendOrQueueReportAsync(
+        IBaseApi baseApi,
+        Report report,
+        CancellationToken cancellationToken)
+    {
+        var sent = await TrySendReportAsync(baseApi, report, cancellationToken);
+        if (sent)
+        {
+            return;
+        }
+
+        PendingReports.Enqueue(report);
+        Logger.LogWarning("Report {ReportId} was queued for retry. Queue size: {QueueSize}.",
+            report.Id,
+            PendingReports.Count);
+    }
+
+    private async Task<bool> TrySendReportAsync(
+        IBaseApi baseApi,
+        Report report,
+        CancellationToken cancellationToken)
+    {
+        var result = await baseApi.SendReportAsync(report, cancellationToken);
+        if (result.Success)
+        {
+            Logger.LogInformation("Report {ReportId} sent successfully.", report.Id);
+            return true;
+        }
+
+        Logger.LogWarning("Report {ReportId} was not accepted by API: {Result}.", report.Id, result);
+        return false;
     }
 }

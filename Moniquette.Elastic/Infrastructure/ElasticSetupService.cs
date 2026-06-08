@@ -1,6 +1,5 @@
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.IndexManagement;
-using Moniquette.Common.Models;
 using Moniquette.Elastic.Entities;
 using Moniquette.Elastic.Extensions;
 
@@ -8,25 +7,29 @@ namespace Moniquette.Elastic.Infrastructure;
 
 public class ElasticSetupService(ElasticsearchClient client)
 {
-    private const string SessionIndexName = "sessions";
-    private const string ReportIndexName = "reports";
-
-    public async Task SetupAsync()
+    public async Task SetupAsync(CancellationToken cancellationToken = default)
     {
-        await CreateIndexAsync(SessionIndexName, SetupMappingsSessionIndex);
-        await CreateIndexAsync(ReportIndexName, SetupMappingsReportsIndex);
+        await CreateIndexAsync(ElasticIndexNames.Sessions, SetupMappingsSessionIndex, cancellationToken);
+        await CreateIndexAsync(ElasticIndexNames.Reports, SetupMappingsReportsIndex, cancellationToken);
+        await CreateIndexAsync(ElasticIndexNames.Processes, SetupMappingsReportProcessesIndex, cancellationToken);
+        await CreateIndexAsync(ElasticIndexNames.Threats, SetupMappingsThreatsIndex, cancellationToken);
+        await CreateIndexAsync(ElasticIndexNames.SuspiciousProcessesWindows, SetupMappingsSuspiciousProcessesIndex, cancellationToken);
+        await CreateIndexAsync(ElasticIndexNames.SuspiciousProcessesLinux, SetupMappingsSuspiciousProcessesIndex, cancellationToken);
+        await CreateIndexAsync(ElasticIndexNames.SuspiciousDockerImages, SetupMappingsSuspiciousDockerImagesIndex, cancellationToken);
     }
 
-    private async Task CreateIndexAsync(string indexName, Action<CreateIndexRequestDescriptor> mapping)
+    private async Task CreateIndexAsync(
+        string indexName,
+        Action<CreateIndexRequestDescriptor> mapping,
+        CancellationToken cancellationToken)
     {
-        var exists = await client.Indices.ExistsAsync(indexName);
+        var exists = await client.Indices.ExistsAsync(indexName, cancellationToken);
         if (exists.Exists) return;
 
-        var response = await client.Indices.CreateAsync(indexName, mapping.Invoke);
-
+        var response = await client.Indices.CreateAsync(indexName, mapping.Invoke, cancellationToken);
         if (!response.Acknowledged)
         {
-            throw new Exception($"Failed to create '{indexName}' index");
+            throw new InvalidOperationException($"Failed to create '{indexName}' index.");
         }
     }
 
@@ -34,20 +37,13 @@ public class ElasticSetupService(ElasticsearchClient client)
     {
         descriptor.Mappings(m => m
             .Properties<ElasticSession>(pd =>
-                {
-                    pd.Keyword(s => s.Id);
-                    pd.Text(
-                        s => s.FirstName,
-                        desc => desc.Fields(f => f.Keyword("keyword")));
-                    pd.Text(
-                        s => s.MiddleName,
-                        desc => desc.Fields(f => f.Keyword("keyword")));
-                    pd.Text(
-                        s => s.LastName,
-                        desc => desc.Fields(f => f.Keyword("keyword")));
-                    pd.Object(p => p.HardwareInfo, o => o.Enabled(false));
-                }
-            )
+            {
+                pd.Keyword(s => s.Id);
+                pd.Text(s => s.FirstName, desc => desc.Fields(f => f.Keyword("keyword")));
+                pd.Text(s => s.MiddleName, desc => desc.Fields(f => f.Keyword("keyword")));
+                pd.Text(s => s.LastName, desc => desc.Fields(f => f.Keyword("keyword")));
+                pd.Object(p => p.HardwareInfo, o => o.Enabled(false));
+            })
         ).WithDefaults();
     }
 
@@ -56,9 +52,21 @@ public class ElasticSetupService(ElasticsearchClient client)
         descriptor.Mappings(md =>
             md.Properties<ElasticReport>(pd =>
             {
+                pd.Keyword(p => p.Id);
                 pd.Keyword(p => p.SessionId);
                 pd.Date(p => p.Timestamp);
                 pd.Keyword(p => p.ProcessIds);
+                pd.Nested(p => p.Processes, n => n
+                    .Properties(np => np
+                        .Keyword(p => p.Processes.First().Id)
+                        .IntegerNumber(p => p.Processes.First().Pid)
+                        .Keyword(p => p.Processes.First().Name)
+                        .Text(p => p.Processes.First().Title)
+                        .Keyword(p => p.Processes.First().ExecutablePath)
+                        .LongNumber(p => p.Processes.First().Signature, desc => desc.Index(false))
+                        .LongNumber(p => p.Processes.First().Bands)
+                    )
+                );
                 pd.Object(p => p.HardwareInfo, o => o.Enabled(false));
                 pd.Nested(p => p.Connections, n => n
                     .Properties(np => np
@@ -76,38 +84,75 @@ public class ElasticSetupService(ElasticsearchClient client)
                 pd.Nested(p => p.DockerContainers, n => n
                     .Properties(np => np
                         .Keyword(d => d.DockerContainers.First().Name)
-                        .Keyword(d => d.DockerContainers.First().ImageDigest)
+                        .Keyword(d => d.DockerContainers.First().ImageName)
                         .Keyword(d => d.DockerContainers.First().ImageDigest)
                     )
                 );
             })
         ).WithDefaults();
     }
-    
-    private void SetupMappings_Index(CreateIndexRequestDescriptor descriptor)
+
+    private void SetupMappingsThreatsIndex(CreateIndexRequestDescriptor descriptor)
     {
-        /*
         descriptor.Mappings(m => m
-            .Properties<_>(pd =>
-                {
-                }
-            )
+            .Properties<ElasticThreat>(pd =>
+            {
+                pd.Keyword(t => t.Id);
+                pd.Date(t => t.Timestamp);
+                pd.Keyword(t => t.Type);
+                pd.Keyword(t => t.SessionId);
+                pd.Keyword(t => t.ReportId);
+                pd.Text(t => t.Details);
+            })
         ).WithDefaults();
-        */
-        throw new NotImplementedException();
     }
 
-    public async Task CreateProcessIndexAsync()
+    private void SetupMappingsReportProcessesIndex(CreateIndexRequestDescriptor descriptor)
     {
-        throw new NotImplementedException();
+        descriptor.Mappings(m => m
+            .Properties<ElasticReportProcess>(pd =>
+            {
+                pd.Keyword(p => p.Id);
+                pd.Keyword(p => p.SessionId);
+                pd.Keyword(p => p.ReportId);
+                pd.Date(p => p.Timestamp);
+                pd.IntegerNumber(p => p.Pid);
+                pd.Keyword(p => p.Name);
+                pd.Text(p => p.Title);
+                pd.Keyword(p => p.ExecutablePath);
+                pd.LongNumber(p => p.Signature, desc => desc.Index(false));
+                pd.LongNumber(p => p.Bands);
+            })
+        ).WithDefaults();
     }
 
-    public async Task CreateRemarksIndexAsync()
+    private void SetupMappingsSuspiciousProcessesIndex(CreateIndexRequestDescriptor descriptor)
     {
-        throw new NotImplementedException();
+        descriptor.Mappings(m => m
+            .Properties<ElasticProcessInfo>(pd =>
+            {
+                pd.Keyword(p => p.Id);
+                pd.IntegerNumber(p => p.Pid);
+                pd.Keyword(p => p.Name);
+                pd.Text(p => p.Title);
+                pd.Keyword(p => p.ExecutablePath);
+                pd.LongNumber(p => p.Signature, desc => desc.Index(false));
+                pd.LongNumber(p => p.Bands);
+            })
+        ).WithDefaults();
     }
 
-    public async Task CreateSuspiciousProcessIndexesAsync()
+    private void SetupMappingsSuspiciousDockerImagesIndex(CreateIndexRequestDescriptor descriptor)
     {
+        descriptor.Mappings(m => m
+            .Properties<ElasticSuspiciousDockerImage>(pd =>
+            {
+                pd.Keyword(i => i.Id);
+                pd.Keyword(i => i.Name);
+                pd.Keyword(i => i.ImageName);
+                pd.Keyword(i => i.ImageDigest);
+                pd.Text(i => i.Details);
+            })
+        ).WithDefaults();
     }
 }

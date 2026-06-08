@@ -16,6 +16,8 @@ public class ActiveViewFiller(
 {
     public async Task<Report> Fill(Report report, CancellationToken cancellationToken)
     {
+        logger.LogDebug("Filling active window titles for process list.");
+
         if (!LinuxUtils.IsRoot())
         {
             // throw new WrongPrivilegesException("Linux executable must be run with sudo.");
@@ -32,9 +34,13 @@ public class ActiveViewFiller(
     
     private async Task<List<ActiveView>> GetViews()
     {
+        if (OperatingSystem.IsWindows())
+        {
+            return GetWindowsViews();
+        }
+
         return operatingSystemService.GetOperatingSystem() switch
         {
-            Literals.Windows => GetWindowsViews(),
             Literals.Linux => await GetLinuxViews(),
             _ => []
         };

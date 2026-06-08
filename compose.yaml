@@ -1,7 +1,43 @@
 ﻿services:
-  # moniquette.server:
-  #   image: moniquette.server
-  #   build:
-  #     context: .
-  #     dockerfile: Moniquette.Server/Dockerfile
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.4
+    container_name: moniquette-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
+  moniquette.server:
+    image: moniquette.server
+    build:
+      context: .
+      dockerfile: Moniquette.Server/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Urls__ElasticSearch: http://elasticsearch:9200
+      Jwt__Issuer: Moniquette.Server
+      Jwt__Audience: Moniquette.Client
+      Jwt__Secret: development-only-moniquette-jwt-secret-change-me
+      Jwt__TokenLifetimeMinutes: 240
+      Kestrel__Endpoints__HttpEndpoint__Url: http://0.0.0.0:8080
+      Kestrel__Endpoints__HttpEndpoint__Protocols: Http1
+      Kestrel__Endpoints__GrpcEndpoint__Url: http://0.0.0.0:5050
+      Kestrel__Endpoints__GrpcEndpoint__Protocols: Http2
+    ports:
+      - "8080:8080"
+      - "5050:5050"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  elasticsearch-data:
