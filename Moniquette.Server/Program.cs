@@ -34,7 +34,8 @@ builder.Services.AddSingleton(_ =>
     }
 
     var settings = new ElasticsearchClientSettings(new Uri(elasticUrl))
-        .DefaultIndex("sessions");
+        .DefaultIndex("sessions")
+        .DisableDirectStreaming();
     return new ElasticsearchClient(settings);
 });
 builder.Services.AddSingleton<ElasticSetupService>();
@@ -55,10 +56,20 @@ builder.Services.AddScoped<IReportAnalyzer, ProcessAnalyzer>();
 builder.Services.AddScoped<IReportAnalyzer, DockerImageAnalyzer>();
 builder.Services.AddScoped<IReportAnalyzer, NetworkAnalyzer>();
 
+builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+
 var app = builder.Build();
 
 await app.Services.GetRequiredService<ElasticSetupService>()
     .SetupAsync(app.Lifetime.ApplicationStopping);
+
+
+app.MapOpenApi();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/openapi/v1.json", "v1");
+});
 
 app.UseCors("MoniquetteAdminDevelopment");
 app.MapControllers();

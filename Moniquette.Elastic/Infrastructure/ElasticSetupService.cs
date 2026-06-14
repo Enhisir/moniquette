@@ -72,7 +72,7 @@ public class ElasticSetupService(ElasticsearchClient client)
                     .Properties(np => np
                         .Keyword(c => c.Connections.First().Name)
                         .Keyword(c => c.Connections.First().Description)
-                        .IntegerNumber(c => c.Connections.First().InterfaceType)
+                        .Keyword(c => c.Connections.First().InterfaceType)
                         .Keyword(c => c.Connections.First().IpAddressString)
                         .Keyword(c => c.Connections.First().MacAddressString)
                         .Keyword(c => c.Connections.First().DomainNameServices)

@@ -15,6 +15,11 @@ public interface IThreatRepository
         Guid sessionId,
         int limit,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<Threat>> GetByReportIdAsync(
+        Guid reportId,
+        int limit,
+        CancellationToken cancellationToken);
 }
 
 public class ElasticThreatRepository(
@@ -66,6 +71,32 @@ public class ElasticThreatRepository(
         {
             logger.LogError("Failed to read threats for session {SessionId}: {DebugInformation}",
                 sessionId,
+                response.DebugInformation);
+            throw new InvalidOperationException("Failed to read threats.");
+        }
+
+        return response.Documents
+            .Select(Map)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyCollection<Threat>> GetByReportIdAsync(
+        Guid reportId,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        var response = await client.SearchAsync<ElasticThreat>(
+            descriptor => descriptor
+                .Indices(ElasticIndexNames.Threats)
+                .Size(limit)
+                .Query(q => q.Term(t => t.Field(threat => threat.ReportId).Value(reportId.ToString())))
+                .Sort(s => s.Field(f => f.Field(threat => threat.Timestamp).Order(SortOrder.Desc))),
+            cancellationToken);
+
+        if (!response.IsValidResponse)
+        {
+            logger.LogError("Failed to read threats for report {ReportId}: {DebugInformation}",
+                reportId,
                 response.DebugInformation);
             throw new InvalidOperationException("Failed to read threats.");
         }

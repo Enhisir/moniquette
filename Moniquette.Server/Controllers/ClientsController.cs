@@ -84,7 +84,9 @@ public class ClientsController(
         CancellationToken cancellationToken)
     {
         var lastReport = await reportRepository.GetLatestBySessionIdAsync(session.Id, cancellationToken);
-        var threats = await threatRepository.GetBySessionIdAsync(session.Id, limit: 100, cancellationToken);
+        var threats = lastReport is null
+            ? []
+            : await threatRepository.GetByReportIdAsync(lastReport.Id, limit: 100, cancellationToken);
 
         return new SessionStateDto
         {

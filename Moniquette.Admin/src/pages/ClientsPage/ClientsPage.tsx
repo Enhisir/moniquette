@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClientSession } from "@/entities/client/types";
 import { ClientList } from "./components/ClientList/ClientList";
 import { ClientDetailsPanel } from "./components/ClientDetailsPanel/ClientDetailsPanel";
-import { monitoringApi, mergeReport, mergeThreats } from "@/shared/api/monitoringApi";
+import { monitoringApi, mergeReport, replaceThreats } from "@/shared/api/monitoringApi";
 import {
   MonitoringRealtimeClient,
   type RealtimeStatus,
@@ -70,7 +70,7 @@ export const ClientsPage = () => {
         setClients((current) =>
           current.map((client) =>
             client.session.id === event.sessionId
-              ? mergeThreats(client, event.threats)
+              ? replaceThreats(client, event.threats)
               : client
           )
         );
@@ -79,7 +79,7 @@ export const ClientsPage = () => {
         setClients((current) =>
           current.map((client) =>
             client.session.id === sessionId
-              ? mergeThreats(client, threats)
+              ? replaceThreats(client, threats)
               : client
           )
         );

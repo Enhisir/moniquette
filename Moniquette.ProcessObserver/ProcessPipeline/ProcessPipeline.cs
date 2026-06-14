@@ -10,8 +10,7 @@ public class ProcessPipeline(
 {
     private List<IProcessHandler> Handlers { get; } =
     [
-        new FlatpakProcessHandler(),
-        new LinuxProcessHandler(),
+        ..CreateProcessHandlers(),
         new ProcessSignatureHandler(capstone, psc)
     ];
 
@@ -22,5 +21,20 @@ public class ProcessPipeline(
                 Enumerable.Empty<ProcessInfo>(),
                 (sum, handler) => handler.Invoke(sum))
             .ToList();
+    }
+
+    private static IEnumerable<IProcessHandler> CreateProcessHandlers()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return [new WindowsProcessHandler()];
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            return [new FlatpakProcessHandler(), new LinuxProcessHandler()];
+        }
+
+        return [];
     }
 }

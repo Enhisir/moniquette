@@ -109,8 +109,12 @@ public static class ServiceCollectionExtensions
             .AddTransient<IReportFiller, HardwareFiller>()
             .AddTransient<IReportFiller, NetworkFiller>()
             .AddTransient<IReportFiller, ProcessFiller>()
-            // .AddTransient<IReportFiller, ActiveViewFiller>()
             .AddTransient<IReportFiller, DockerFiller>();
+
+        if (OperatingSystem.IsLinux())
+        {
+            services.AddTransient<IReportFiller, ActiveViewFiller>();
+        }
 
         if (OperatingSystem.IsWindows())
         {

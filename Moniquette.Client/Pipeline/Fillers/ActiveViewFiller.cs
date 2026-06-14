@@ -50,15 +50,21 @@ public class ActiveViewFiller(
     private static List<ActiveView> GetWindowsViews()
     {
         var views = new List<ActiveView>();
-        var callback = new CallBack((hWnd, pId) =>
+        var callback = new WindowEnumCallback((hWnd, lParam) =>
         {
+            if (!WindowsUtils.IsWindowVisible(hWnd) || WindowsUtils.GetWindowTextLength(hWnd) == 0)
+            {
+                return true;
+            }
+
             var classNameBuffer = new StringBuilder(256);
             var titleBuffer = new StringBuilder(256);
             _ = WindowsUtils.GetClassName(hWnd, classNameBuffer, classNameBuffer.Capacity);
             _ = WindowsUtils.GetWindowText(hWnd, titleBuffer, titleBuffer.Capacity);
+            WindowsUtils.GetWindowThreadProcessId(hWnd, out var processId);
             views.Add(new ActiveView {
-                Id = hWnd,
-                Pid = pId,
+                Id = unchecked((int)hWnd.ToInt64()),
+                Pid = (int)processId,
                 Class = classNameBuffer.ToString(),
                 Title = titleBuffer.ToString()
             });

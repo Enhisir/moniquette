@@ -7,13 +7,26 @@ namespace Moniquette.Server.Analysis;
 public class NetworkAnalyzer(IOptions<NetworkPolicyOptions> options) : AnalyzerBase
 {
     private readonly NetworkPolicyOptions policy = options.Value;
+    private static readonly string[] DockerInterfaceNames =
+    [
+        "docker0",
+        "docker_gwbridge"
+    ];
+
+    private static readonly string[] DockerInterfaceNamePrefixes =
+    [
+        "br-",
+        "veth"
+    ];
 
     public override Task<IReadOnlyCollection<Threat>> AnalyzeAsync(
         Report report,
         CancellationToken cancellationToken)
     {
         var threats = new List<Threat>();
-        var connections = report.Connections;
+        var connections = report.Connections
+            .Where(connection => !IsDockerNetworkConnection(connection))
+            .ToList();
 
         if (connections.Count != policy.RequiredConnectionCount)
         {
@@ -113,6 +126,19 @@ public class NetworkAnalyzer(IOptions<NetworkPolicyOptions> options) : AnalyzerB
             .Where(char.IsAsciiHexDigit)
             .Select(char.ToUpperInvariant)
             .ToArray());
+
+    private static bool IsDockerNetworkConnection(NetworkConnection connection)
+    {
+        var name = Normalize(connection.Name);
+        var description = Normalize(connection.Description);
+
+        return DockerInterfaceNames.Any(interfaceName =>
+                   string.Equals(name, interfaceName, StringComparison.OrdinalIgnoreCase))
+               || DockerInterfaceNamePrefixes.Any(prefix =>
+                   name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+               || ContainsAny(name, "docker")
+               || ContainsAny(description, "docker");
+    }
 
     private static string FormatConnection(NetworkConnection connection)
         => $"{connection.Name}, type={connection.InterfaceType}, ip={connection.IpAddressString ?? "none"}, mac={connection.MacAddressString ?? "none"}, gateways=[{string.Join(", ", connection.Gateways)}], dns=[{string.Join(", ", connection.DomainNameServices)}]";

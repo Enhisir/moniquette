@@ -28,8 +28,10 @@ public class UsbDeviceAnalyzer : AnalyzerBase
         DetectCdcDataDevice,
         DetectStillImageOrMtpDevice,
         DetectMassStorageDevice,
-        DetectWirelessControllerDevice,
-        DetectKeyboardHidDevice,
+        // Отключено как слишком широкое правило: сюда попадают обычные USB-адаптеры мышей/клавиатур.
+        // DetectWirelessControllerDevice,
+        // Отключено как слишком широкое правило: отдельная клавиатура сама по себе не достаточный признак риска.
+        // DetectKeyboardHidDevice,
         DetectVendorSpecificMobileDevice
     ];
 

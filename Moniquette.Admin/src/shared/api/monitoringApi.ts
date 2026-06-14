@@ -51,12 +51,12 @@ export const mergeReport = (
   },
 });
 
-export const mergeThreats = (
+export const replaceThreats = (
   client: ClientSession,
   threats: Threat[]
 ): ClientSession => ({
   ...client,
-  threats: dedupeThreats([...threats, ...client.threats]),
+  threats: dedupeThreats(threats),
 });
 
 const getPrimaryIpAddress = (report?: Report | null): string =>
