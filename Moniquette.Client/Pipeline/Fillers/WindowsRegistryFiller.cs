@@ -17,12 +17,12 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
             return Task.FromResult(report);
 
         var registryArchive = new Dictionary<string, string>();
-        foreach (var (hive, view, _) in Roots)
+        foreach (var (hive, view, basePath) in Roots)
         {
             BaseUtils.TryInvoke<Exception>(() =>
             {
                 using var baseKey = RegistryKey.OpenBaseKey(hive, view);
-                GetRegistryEntriesDfs(registryArchive, baseKey);
+                GetRegistryEntriesDfs(registryArchive, baseKey, basePath);
             });
         }
         report.WindowsRegistry = registryArchive;
@@ -59,7 +59,8 @@ public class WindowsRegistryFiller(IHardwareInfo info) : IReportFiller
                 BaseUtils.TryInvoke<Exception>(() =>
                 {
                     var value = key.GetValue(entry)?.ToString() ?? "NULL";
-                    registryArchive.Add(entry, value);
+                    var valueName = string.IsNullOrWhiteSpace(entry) ? "(default)" : entry;
+                    registryArchive[$"{basePath}\\{valueName}"] = value;
                 });
             }
         });
